@@ -2,89 +2,138 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Axion AI - Futuristic Assistant</title>
+<title>Axion AI - Futuristic Neural Chat</title>
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap');
+
     body {
-        font-family: Arial, sans-serif;
-        background: radial-gradient(circle, #030014, #000000);
-        margin: 0; padding: 0;
-        display: flex; justify-content: center; align-items: center;
+        margin: 0;
+        padding: 0;
+        font-family: 'Orbitron', sans-serif;
         height: 100vh;
         overflow: hidden;
-        color:white;
+        color: white;
+        background: #020010;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
+    /* === BACKGROUND NEURAL PARTICLES === */
+    canvas {
+        position: fixed;
+        top:0; left:0;
+        width:100%; height:100%;
+        z-index: -1;
+        background: radial-gradient(circle at center, #09001f 0%, #000000 100%);
+    }
+
+    /* === CHAT CONTAINER === */
     .container {
-        width: 90%; max-width: 500px;
-        background: rgba(10, 0, 40, 0.65);
-        border: 2px solid #6b00ff;
-        border-radius: 12px;
-        padding: 15px;
-        backdrop-filter: blur(10px);
-        box-shadow: 0 0 20px #6b00ffbb;
+        width: 90%;
+        max-width: 560px;
+        background: rgba(10, 0, 35, 0.55);
+        border: 1px solid rgba(0, 200, 255, 0.35);
+        border-radius: 15px;
+        backdrop-filter: blur(18px);
+        padding: 18px;
+        box-shadow: 0 0 25px rgba(0,255,255,0.2), inset 0 0 30px rgba(50,0,120,0.4);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
     }
 
     .logo {
-        font-size: 32px;
-        font-weight: bold;
+        font-size: 30px;
         text-align: center;
-        margin-bottom: 10px;
-        background: linear-gradient(90deg,#6b00ff,#00b7ff);
+        font-weight: 600;
+        background: linear-gradient(90deg, #b400ff, #00d0ff);
         -webkit-background-clip: text;
         color: transparent;
-        animation: glow 3s infinite alternate;
-    }
-
-    @keyframes glow {
-        from { text-shadow: 0 0 15px #6b00ff; }
-        to { text-shadow: 0 0 25px #00b7ff; }
+        text-shadow: 0 0 15px rgba(0,200,255,0.45);
+        margin-bottom: 5px;
     }
 
     #chat {
-        height: 350px; overflow-y: auto; padding: 8px;
-        background: rgba(0,0,20,0.5); border-radius: 8px;
-        border: 1px solid #5c00d4;
-        margin-bottom: 10px; font-size: 14px;
+        flex: 1;
+        min-height: 350px;
+        overflow-y: auto;
+        padding: 10px;
+        border-radius: 10px;
+        background: rgba(0,0,30,0.35);
+        border: 1px solid rgba(140,0,255,0.35);
     }
 
-    .msg-user { color:#00d4ff; margin-bottom: 5px;}
-    .msg-ai { color:#c084ff; margin-bottom: 12px;}
-    
+    .msg-user, .msg-ai {
+        padding: 10px 12px;
+        border-radius: 10px;
+        max-width: 85%;
+        margin-bottom: 12px;
+        line-height: 1.4em;
+        font-size: 14px;
+    }
+
+    .msg-user {
+        background: rgba(0,110,255,0.25);
+        border: 1px solid rgba(0,170,255,0.6);
+        text-align: left;
+        margin-left: auto;
+        color: #00e1ff;
+    }
+
+    .msg-ai {
+        background: rgba(150,0,255,0.25);
+        border: 1px solid rgba(200,0,255,0.6);
+        color: #d8b7ff;
+    }
+
     input {
         width: 100%; padding: 12px;
-        border-radius: 8px; border: 1px solid #6b00ff;
-        background:#0a0020; color:white;
-        font-size: 16px;
+        border-radius: 8px;
+        border: 1px solid #8400ff;
+        background: rgba(15,0,40,0.8);
+        color:white;
+        font-size: 15px;
+        outline: none;
     }
 
     button {
-        margin-top: 8px; width: 100%; padding: 12px;
-        background: linear-gradient(90deg,#6b00ff,#00b7ff);
-        border: none; color:white; font-size: 16px;
-        border-radius: 8px; cursor:pointer;
+        padding: 12px;
+        width: 100%;
+        border-radius: 8px;
+        border: none;
+        font-size: 15px;
+        background: linear-gradient(90deg,#7b00ff,#00b7ff);
+        color:white;
+        cursor:pointer;
+        transition: .3s;
     }
-
+    button:hover {
+        filter: brightness(1.2);
+    }
 </style>
 </head>
 <body>
 
+<canvas id="bg"></canvas>
+
 <div class="container">
-    <div class="logo">⚛️ AXION AI</div>
+    <div class="logo">⚛ AXION NEURAL AI</div>
     <div id="chat"></div>
 
-    <input id="txt" placeholder="Digite sua pergunta...">
+    <input id="txt" placeholder="Digite algo...">
     <button onclick="send()">Enviar</button>
 </div>
 
 <script>
 async function send() {
-    const user = document.getElementById("txt").value;
+    const input = document.getElementById("txt");
+    const user = input.value.trim();
     if (!user) return;
 
-    document.getElementById("chat").innerHTML += 
-        `<div class='msg-user'><b>Você:</b> ${user}</div>`;   
-
-    document.getElementById("txt").value = "";
+    const box = document.getElementById("chat");
+    box.innerHTML += `<div class='msg-user'>${user}</div>`;
+    input.value = "";
 
     const res = await fetch("https://axion-ia.dragonsjose0.workers.dev/", {
         method: "POST",
@@ -94,12 +143,67 @@ async function send() {
 
     const data = await res.json();
     const answer = data.choices?.[0]?.message?.content || "⚠️ Erro ao receber resposta.";
-
-    document.getElementById("chat").innerHTML += 
-        `<div class='msg-ai'><b>Axion:</b> ${answer}</div>`;
-
-    document.getElementById("chat").scrollTop = 999999;
+    
+    box.innerHTML += `<div class='msg-ai'>${answer}</div>`;
+    box.scrollTop = box.scrollHeight;
 }
+
+/* ===== Neural Particle Background ===== */
+const c = document.getElementById("bg");
+const ctx = c.getContext("2d");
+let w, h, particles = [];
+
+function resize() {
+    w = c.width = window.innerWidth;
+    h = c.height = window.innerHeight;
+}
+window.addEventListener("resize", resize);
+resize();
+
+class Particle {
+    constructor() {
+        this.x = Math.random() * w;
+        this.y = Math.random() * h;
+        this.vx = (Math.random() - 0.5) * 0.7;
+        this.vy = (Math.random() - 0.5) * 0.7;
+    }
+    update() {
+        this.x += this.vx; this.y += this.vy;
+        if (this.x < 0 || this.x > w) this.vx *= -1;
+        if (this.y < 0 || this.y > h) this.vy *= -1;
+    }
+    draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, 2, 0, Math.PI*2);
+        ctx.fillStyle = "#00d0ff";
+        ctx.fill();
+    }
+}
+
+for (let i = 0; i < 90; i++) particles.push(new Particle());
+
+function animate() {
+    ctx.clearRect(0,0,w,h);
+    particles.forEach(p => {
+        p.update();
+        p.draw();
+    });
+    for (let a of particles) {
+        for (let b of particles) {
+            let dx = a.x-b.x, dy = a.y-b.y;
+            let dist = Math.sqrt(dx*dx+dy*dy);
+            if (dist < 120) {
+                ctx.beginPath();
+                ctx.moveTo(a.x,a.y);
+                ctx.lineTo(b.x,b.y);
+                ctx.strokeStyle = "rgba(0,220,255,"+(1-dist/120)+")";
+                ctx.stroke();
+            }
+        }
+    }
+    requestAnimationFrame(animate);
+}
+animate();
 </script>
 
 </body>
