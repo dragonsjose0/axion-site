@@ -2,66 +2,77 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Axion AI - Futuristic Neural Chat</title>
+<title>Axion AI - Neural Chat</title>
+
+<!-- ÍCONE FUTURISTA -->
+<link rel="icon" href="https://cdn-icons-png.flaticon.com/512/4333/4333609.png" type="image/png">
+
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap');
 
     body {
         margin: 0;
         padding: 0;
-        font-family: 'Orbitron', sans-serif;
         height: 100vh;
-        overflow: hidden;
         color: white;
-        background: #020010;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        font-family: 'Orbitron', sans-serif;
+        background: url('https://img.freepik.com/premium-photo/abstract-digital-network-connection-background_34663-5913.jpg') center/cover no-repeat;
+        overflow-y: scroll; /* ➤ Scroll ativado */
     }
 
-    /* === BACKGROUND NEURAL PARTICLES === */
+    /* Canvas partículas */
     canvas {
         position: fixed;
         top:0; left:0;
         width:100%; height:100%;
         z-index: -1;
-        background: radial-gradient(circle at center, #09001f 0%, #000000 100%);
     }
 
-    /* === CHAT CONTAINER === */
+    /* QUADRO EXTERNO (GRANDE) estilo ChatGPT */
+    .outer-container {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        margin-top: 40px;
+        margin-bottom: 40px;
+    }
+
+    /* QUADRO INTERNO (onde fica o chat) */
     .container {
-        width: 90%;
-        max-width: 560px;
+        width: 95%;
+        max-width: 900px;
+        min-height: 600px;
         background: rgba(10, 0, 35, 0.55);
         border: 1px solid rgba(0, 200, 255, 0.35);
         border-radius: 15px;
         backdrop-filter: blur(18px);
-        padding: 18px;
         box-shadow: 0 0 25px rgba(0,255,255,0.2), inset 0 0 30px rgba(50,0,120,0.4);
         display: flex;
         flex-direction: column;
+        padding: 25px;
         gap: 10px;
     }
 
     .logo {
-        font-size: 30px;
+        font-size: 32px;
         text-align: center;
         font-weight: 600;
         background: linear-gradient(90deg, #b400ff, #00d0ff);
         -webkit-background-clip: text;
         color: transparent;
         text-shadow: 0 0 15px rgba(0,200,255,0.45);
-        margin-bottom: 5px;
+        margin-bottom: 10px;
     }
 
     #chat {
         flex: 1;
-        min-height: 350px;
         overflow-y: auto;
-        padding: 10px;
+        min-height: 450px;
         border-radius: 10px;
+        padding: 15px;
         background: rgba(0,0,30,0.35);
         border: 1px solid rgba(140,0,255,0.35);
+        scrollbar-width: thin; /* Firefox */
     }
 
     .msg-user, .msg-ai {
@@ -88,26 +99,28 @@
     }
 
     input {
-        width: 100%; padding: 12px;
+        width: 100%;
+        padding: 14px;
         border-radius: 8px;
         border: 1px solid #8400ff;
         background: rgba(15,0,40,0.8);
-        color:white;
-        font-size: 15px;
+        color: white;
+        font-size: 16px;
         outline: none;
     }
 
     button {
-        padding: 12px;
         width: 100%;
+        padding: 14px;
         border-radius: 8px;
         border: none;
-        font-size: 15px;
+        font-size: 16px;
         background: linear-gradient(90deg,#7b00ff,#00b7ff);
         color:white;
         cursor:pointer;
         transition: .3s;
     }
+
     button:hover {
         filter: brightness(1.2);
     }
@@ -117,12 +130,13 @@
 
 <canvas id="bg"></canvas>
 
-<div class="container">
-    <div class="logo">⚛ AXION NEURAL AI</div>
-    <div id="chat"></div>
-
-    <input id="txt" placeholder="Digite algo...">
-    <button onclick="send()">Enviar</button>
+<div class="outer-container">
+    <div class="container">
+        <div class="logo">⚛ AXION NEURAL AI</div>
+        <div id="chat"></div>
+        <input id="txt" placeholder="Digite sua mensagem...">
+        <button onclick="send()">Enviar</button>
+    </div>
 </div>
 
 <script>
@@ -148,57 +162,32 @@ async function send() {
     box.scrollTop = box.scrollHeight;
 }
 
-/* ===== Neural Particle Background ===== */
+/* Partículas */
 const c = document.getElementById("bg");
 const ctx = c.getContext("2d");
-let w, h, particles = [];
+let w,h,particles=[];
 
-function resize() {
-    w = c.width = window.innerWidth;
-    h = c.height = window.innerHeight;
+function resize(){w=c.width=window.innerWidth;h=c.height=window.innerHeight;}
+window.addEventListener("resize",resize);resize();
+
+class Particle{
+    constructor(){this.x=Math.random()*w;this.y=Math.random()*h;this.vx=(Math.random()-.5)*.7;this.vy=(Math.random()-.5)*.7;}
+    update(){this.x+=this.vx;this.y+=this.vy;if(this.x<0||this.x>w)this.vx*=-1;if(this.y<0||this.y>h)this.vy*=-1;}
+    draw(){ctx.beginPath();ctx.arc(this.x,this.y,2,0,Math.PI*2);ctx.fillStyle="#00d0ff";ctx.fill();}
 }
-window.addEventListener("resize", resize);
-resize();
+for(let i=0;i<100;i++)particles.push(new Particle());
 
-class Particle {
-    constructor() {
-        this.x = Math.random() * w;
-        this.y = Math.random() * h;
-        this.vx = (Math.random() - 0.5) * 0.7;
-        this.vy = (Math.random() - 0.5) * 0.7;
-    }
-    update() {
-        this.x += this.vx; this.y += this.vy;
-        if (this.x < 0 || this.x > w) this.vx *= -1;
-        if (this.y < 0 || this.y > h) this.vy *= -1;
-    }
-    draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, 2, 0, Math.PI*2);
-        ctx.fillStyle = "#00d0ff";
-        ctx.fill();
-    }
-}
-
-for (let i = 0; i < 90; i++) particles.push(new Particle());
-
-function animate() {
+function animate(){
     ctx.clearRect(0,0,w,h);
-    particles.forEach(p => {
-        p.update();
-        p.draw();
-    });
-    for (let a of particles) {
-        for (let b of particles) {
-            let dx = a.x-b.x, dy = a.y-b.y;
-            let dist = Math.sqrt(dx*dx+dy*dy);
-            if (dist < 120) {
-                ctx.beginPath();
-                ctx.moveTo(a.x,a.y);
-                ctx.lineTo(b.x,b.y);
-                ctx.strokeStyle = "rgba(0,220,255,"+(1-dist/120)+")";
-                ctx.stroke();
-            }
+    particles.forEach(p=>{p.update();p.draw();});
+    for(let a of particles)for(let b of particles){
+        let dx=a.x-b.x,dy=a.y-b.y,dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist<120){
+            ctx.beginPath();
+            ctx.moveTo(a.x,a.y);
+            ctx.lineTo(b.x,b.y);
+            ctx.strokeStyle=`rgba(0,220,255,${1-dist/120})`;
+            ctx.stroke();
         }
     }
     requestAnimationFrame(animate);
@@ -208,3 +197,4 @@ animate();
 
 </body>
 </html>
+
