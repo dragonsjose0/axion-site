@@ -3,11 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <title>Axion AI - Neural Chat</title>
-<link rel="icon" href="https://cdn-icons-png.flaticon.com/512/4333/4333609.png" type="image/png">
+
+<!-- ÍCONE DA IA FUTURISTA -->
+<link rel="icon" href="https://cdn-icons-png.flaticon.com/512/4712/4712109.png" type="image/png">
 
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap');
-
+    
     * { box-sizing: border-box; }
 
     body {
@@ -15,12 +17,20 @@
         height: 100vh;
         overflow: hidden;
         display: flex;
-        background: radial-gradient(circle at center, #0a0020 0%, #000010 100%);
+        background: radial-gradient(circle at center, #080018 0%, #000010 100%);
         color: white;
         font-family: 'Inter', sans-serif;
     }
 
-    /* SIDEBAR ESTÁTICO */
+    /* HOLOGRAM PARTICLES */
+    canvas {
+        position: fixed;
+        top:0; left:0;
+        width:100%; height:100%;
+        z-index:-1;
+    }
+
+    /* SIDEBAR */
     .sidebar {
         width: 240px;
         background: rgba(15, 0, 40, 0.7);
@@ -40,7 +50,7 @@
         margin-bottom: 5px;
     }
 
-    .chat-item {
+    .chat-item, .new-chat {
         padding: 10px;
         border-radius: 8px;
         border: 1px solid rgba(0,150,255,0.3);
@@ -50,27 +60,18 @@
         transition: .2s;
     }
 
-    .chat-item:hover {
+    .chat-item:hover, .new-chat:hover {
         background: rgba(0,150,255,0.2);
     }
 
     .new-chat {
-        padding: 12px;
-        border-radius: 8px;
         background: linear-gradient(90deg,#8000ff,#00b7ff);
+        border: none;
+        font-weight: 600;
         text-align: center;
-        font-size: 15px;
-        cursor: pointer;
-        transition: .2s;
-        margin-bottom: 5px;
-        font-weight: 500;
     }
 
-    .new-chat:hover {
-        opacity: .85;
-    }
-
-    /* ÁREA PRINCIPAL */
+    /* MAIN */
     .main {
         flex: 1;
         display: flex;
@@ -91,7 +92,6 @@
         text-shadow: 0 0 10px rgba(0,200,255,0.4);
     }
 
-    /* QUADRO DO CHAT */
     #chat {
         flex: 1;
         background: rgba(0,0,30,0.45);
@@ -111,19 +111,20 @@
         line-height: 1.4em;
         font-size: 14px;
     }
+
     .msg-user {
         background: rgba(0,110,255,0.25);
         border: 1px solid rgba(0,170,255,0.6);
         margin-left: auto;
         color: #00e1ff;
     }
+
     .msg-ai {
         background: rgba(150,0,255,0.25);
         border: 1px solid rgba(200,0,255,0.6);
         color: #e2c5ff;
     }
 
-    /* INPUT + BOTÃO */
     .bottom {
         display: flex;
         gap: 10px;
@@ -151,22 +152,23 @@
         transition:.3s;
         font-weight: 500;
     }
+
     button:hover { filter: brightness(1.2); }
 </style>
 </head>
 <body>
 
-<!-- MENU LATERAL ESTÁTICO -->
+<canvas id="bg"></canvas>
+
 <div class="sidebar">
-    <div class="new-chat">+ Novo Chat</div>
+    <div class="new-chat" onclick="novoChat()">+ Novo Chat</div>
     <h2>Chats antigos</h2>
-    <div class="chat-item">Como funciona IA?</div>
-    <div class="chat-item">Tradução</div>
-    <div class="chat-item">Explicar Física</div>
-    <div class="chat-item">Resolver Matemática</div>
+    <div class="chat-item" onclick="carregarChat('Como funciona IA?')">Como funciona IA?</div>
+    <div class="chat-item" onclick="carregarChat('Tradução')">Tradução</div>
+    <div class="chat-item" onclick="carregarChat('Explicar Física')">Explicar Física</div>
+    <div class="chat-item" onclick="carregarChat('Resolver Matemática')">Resolver Matemática</div>
 </div>
 
-<!-- ÁREA PRINCIPAL -->
 <div class="main">
     <div class="logo">⚛ AXION NEURAL AI</div>
     <div id="chat"></div>
@@ -195,10 +197,29 @@ async function send() {
 
     const data = await res.json();
     const answer = data.choices?.[0]?.message?.content || "⚠️ Erro ao receber resposta.";
-    
+
     box.innerHTML += `<div class='msg-ai'>${answer}</div>`;
     box.scrollTop = box.scrollHeight;
 }
+
+function novoChat(){
+    document.getElementById("chat").innerHTML = "<div class='msg-ai'>🧠 Novo chat iniciado.</div>";
+}
+
+function carregarChat(titulo){
+    document.getElementById("chat").innerHTML = `<div class='msg-ai'>📂 Chat carregado: <b>${titulo}</b></div>`;
+}
+
+/* HOLOGRAM PARTICLES */
+const c=document.getElementById("bg"),ctx=c.getContext("2d");let w,h,p=[];
+function resize(){w=c.width=window.innerWidth;h=c.height=window.innerHeight;}
+window.addEventListener("resize",resize);resize();
+class Holo{constructor(){this.x=Math.random()*w;this.y=Math.random()*h;this.s=1+Math.random()*2;this.vx=(Math.random()-.5)*0.3;this.vy=(Math.random()-.5)*0.3;}
+update(){this.x+=this.vx;this.y+=this.vy;if(this.x<0||this.x>w)this.vx*=-1;if(this.y<0||this.y>h)this.vy*=-1;}
+draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.s,0,Math.PI*2);ctx.fillStyle="rgba(0,170,255,0.7)";ctx.fill();}}
+for(let i=0;i<80;i++)p.push(new Holo());
+function animate(){ctx.clearRect(0,0,w,h);p.forEach(o=>{o.update();o.draw();});requestAnimationFrame(animate);}
+animate();
 </script>
 
 </body>
