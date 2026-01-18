@@ -4,12 +4,16 @@
 <meta charset="UTF-8">
 <title>Axion AI - Neural Chat</title>
 
-<!-- ÍCONE DA IA FUTURISTA -->
-<link rel="icon" href="https://cdn-icons-png.flaticon.com/512/4712/4712109.png" type="image/png">
+<!-- ÍCONE FUTURISTA -->
+<link rel="icon" href="https://cdn-icons-png.flaticon.com/512/4712/4712037.png" type="image/png">
+
+<!-- MATHJAX PARA FORMULAS -->
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap');
-    
+
     * { box-sizing: border-box; }
 
     body {
@@ -22,7 +26,6 @@
         font-family: 'Inter', sans-serif;
     }
 
-    /* HOLOGRAM PARTICLES */
     canvas {
         position: fixed;
         top:0; left:0;
@@ -30,7 +33,6 @@
         z-index:-1;
     }
 
-    /* SIDEBAR */
     .sidebar {
         width: 240px;
         background: rgba(15, 0, 40, 0.7);
@@ -43,35 +45,25 @@
         overflow-y: auto;
     }
 
-    .sidebar h2 {
-        font-size: 18px;
-        color: #00d0ff;
-        font-weight: 600;
-        margin-bottom: 5px;
-    }
-
-    .chat-item, .new-chat {
-        padding: 10px;
-        border-radius: 8px;
-        border: 1px solid rgba(0,150,255,0.3);
-        background: rgba(10,0,30,0.4);
-        cursor: pointer;
-        font-size: 14px;
-        transition: .2s;
-    }
-
-    .chat-item:hover, .new-chat:hover {
-        background: rgba(0,150,255,0.2);
-    }
-
     .new-chat {
-        background: linear-gradient(90deg,#8000ff,#00b7ff);
+        padding: 12px;
+        border-radius: 8px;
+        background: linear-gradient(90deg,#7b00ff,#00b7ff);
         border: none;
         font-weight: 600;
         text-align: center;
+        cursor: pointer;
+        font-size: 15px;
     }
 
-    /* MAIN */
+    .baixo {
+        margin-top: auto;
+        text-align: center;
+        font-size: 13px;
+        opacity: .8;
+        line-height: 18px;
+    }
+
     .main {
         flex: 1;
         display: flex;
@@ -101,6 +93,7 @@
         overflow-y: auto;
         margin-bottom: 12px;
         backdrop-filter: blur(10px);
+        font-size: 14px;
     }
 
     .msg-user, .msg-ai {
@@ -109,7 +102,6 @@
         max-width: 85%;
         margin-bottom: 12px;
         line-height: 1.4em;
-        font-size: 14px;
     }
 
     .msg-user {
@@ -149,11 +141,8 @@
         color:white;
         font-size: 15px;
         cursor:pointer;
-        transition:.3s;
         font-weight: 500;
     }
-
-    button:hover { filter: brightness(1.2); }
 </style>
 </head>
 <body>
@@ -162,11 +151,13 @@
 
 <div class="sidebar">
     <div class="new-chat" onclick="novoChat()">+ Novo Chat</div>
-    <h2>Chats antigos</h2>
-    <div class="chat-item" onclick="carregarChat('Como funciona IA?')">Como funciona IA?</div>
-    <div class="chat-item" onclick="carregarChat('Tradução')">Tradução</div>
-    <div class="chat-item" onclick="carregarChat('Explicar Física')">Explicar Física</div>
-    <div class="chat-item" onclick="carregarChat('Resolver Matemática')">Resolver Matemática</div>
+
+    <div class="baixo">
+        © Créditos:<br>
+        <b>Davi José</b><br>
+        Senhor Somali<br>
+        Julio
+    </div>
 </div>
 
 <div class="main">
@@ -200,23 +191,18 @@ async function send() {
 
     box.innerHTML += `<div class='msg-ai'>${answer}</div>`;
     box.scrollTop = box.scrollHeight;
+    MathJax.typeset();
 }
 
-function novoChat(){
+function novoChat() {
     document.getElementById("chat").innerHTML = "<div class='msg-ai'>🧠 Novo chat iniciado.</div>";
 }
 
-function carregarChat(titulo){
-    document.getElementById("chat").innerHTML = `<div class='msg-ai'>📂 Chat carregado: <b>${titulo}</b></div>`;
-}
-
-/* HOLOGRAM PARTICLES */
+/* HOLOGRAFIA */
 const c=document.getElementById("bg"),ctx=c.getContext("2d");let w,h,p=[];
 function resize(){w=c.width=window.innerWidth;h=c.height=window.innerHeight;}
 window.addEventListener("resize",resize);resize();
-class Holo{constructor(){this.x=Math.random()*w;this.y=Math.random()*h;this.s=1+Math.random()*2;this.vx=(Math.random()-.5)*0.3;this.vy=(Math.random()-.5)*0.3;}
-update(){this.x+=this.vx;this.y+=this.vy;if(this.x<0||this.x>w)this.vx*=-1;if(this.y<0||this.y>h)this.vy*=-1;}
-draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.s,0,Math.PI*2);ctx.fillStyle="rgba(0,170,255,0.7)";ctx.fill();}}
+class Holo{constructor(){this.x=Math.random()*w;this.y=Math.random()*h;this.s=1+Math.random()*2;this.vx=(Math.random()-.5)*0.3;this.vy=(Math.random()-.5)*0.3;}update(){this.x+=this.vx;this.y+=this.vy;if(this.x<0||this.x>w)this.vx*=-1;if(this.y<0||this.y>h)this.vy*=-1;}draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.s,0,Math.PI*2);ctx.fillStyle="rgba(0,170,255,0.7)";ctx.fill();}}
 for(let i=0;i<80;i++)p.push(new Holo());
 function animate(){ctx.clearRect(0,0,w,h);p.forEach(o=>{o.update();o.draw();});requestAnimationFrame(animate);}
 animate();
