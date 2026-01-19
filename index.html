@@ -24,7 +24,6 @@ body {
     font-family: 'Inter', sans-serif;
 }
 
-/* scroll transparente no chrome */
 *::-webkit-scrollbar { width: 6px; background: transparent; }
 *::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.0); }
 
@@ -183,9 +182,11 @@ button {
 </div>
 
 <script>
-let chats = [];
+let chats = [[]];
 let currentChat = 0;
-novoChat();
+
+renderChat();
+atualizarLista();
 
 async function send() {
     const input = document.getElementById("txt");
@@ -212,22 +213,28 @@ async function send() {
 }
 
 function addMsg(msg, cls, html=false){
+    const formatted = `<div class='${cls}'>${html ? msg : msg}</div>`;
+
+    chats[currentChat].push(formatted);
+    renderChat();
+}
+
+function renderChat(){
     const box = document.getElementById("chat");
-    box.innerHTML += `<div class='${cls}'>${html? msg : escape(msg)}</div>`;
+    box.innerHTML = chats[currentChat].join("");
     box.scrollTop = box.scrollHeight;
 }
 
 function novoChat(){
     chats.push([]);
     currentChat = chats.length - 1;
-
     atualizarLista();
-    document.getElementById("chat").innerHTML = "";
+    renderChat();
 }
 
 function mudarChat(i){
     currentChat = i;
-    document.getElementById("chat").innerHTML = chats[i].join("");
+    renderChat();
 }
 
 function atualizarLista(){
@@ -239,15 +246,15 @@ function atualizarLista(){
 }
 
 function showTyping(){
-    document.getElementById("chat").innerHTML += `<div id='typing' class='typing'>Axion está digitando...</div>`;
+    chats[currentChat].push(`<div id='typing' class='typing'>Axion está digitando...</div>`);
+    renderChat();
 }
 
 function hideTyping(){
-    const t = document.getElementById("typing");
-    if(t) t.remove();
+    chats[currentChat] = chats[currentChat].filter(e => !e.includes("typing"));
+    renderChat();
 }
 
-/* EFEITO NEURAL */
 const c=document.getElementById("bg"),ctx=c.getContext("2d");
 let w,h,pts=[];
 function resize(){w=c.width=innerWidth;h=c.height=innerHeight;}
