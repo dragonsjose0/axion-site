@@ -2,46 +2,31 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Axion AI - Neural Chat</title>
-
+<title>Axion Neural AI</title>
 <link rel="icon" type="image/png" href="logo.png">
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
 <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script async id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap');
 
-* {
-    box-sizing: border-box;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(0,200,255,0.4) transparent;
-}
-
-::-webkit-scrollbar {
-    width: 8px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: rgba(0,200,255,0.4);
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-track {
-    background: transparent;
-}
+* { box-sizing: border-box; scrollbar-width: thin; scrollbar-color: transparent transparent; }
 
 body {
     margin: 0;
     height: 100vh;
     display: flex;
     overflow: hidden;
-    background: radial-gradient(circle at center, #09001f 0%, #000010 100%);
+    background: radial-gradient(circle at center, #060012, #000008 70%);
     color: white;
     font-family: 'Inter', sans-serif;
 }
+
+/* scroll transparente no chrome */
+*::-webkit-scrollbar { width: 6px; background: transparent; }
+*::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.0); }
 
 canvas {
     position: fixed;
@@ -50,44 +35,39 @@ canvas {
     z-index: -1;
     top: 0;
     left: 0;
-    opacity: 0.9;
 }
 
 .sidebar {
     width: 240px;
-    background: rgba(12, 0, 40, 0.65);
-    border-right: 1px solid rgba(0, 200, 255, 0.25);
-    backdrop-filter: blur(10px);
+    background: rgba(12, 0, 40, 0.4);
+    border-right: 1px solid rgba(0, 180, 255, 0.3);
+    backdrop-filter: blur(12px);
     padding: 15px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    animation: glassFade 1.4s ease forwards;
-}
-
-@keyframes glassFade {
-    from {opacity: 0; transform: translateX(-15px);}
-    to {opacity: 1; transform: translateX(0);}
+    gap: 10px;
 }
 
 .new-chat {
-    padding: 12px;
+    padding: 10px;
     border-radius: 8px;
     background: linear-gradient(90deg,#7b00ff,#00b7ff);
-    border: none;
+    cursor: pointer;
     font-weight: 600;
     text-align: center;
-    color: white;
-    cursor: pointer;
-    box-shadow: 0 0 8px rgba(0,200,255,0.3);
 }
 
-.baixo {
-    margin-top: auto;
-    text-align: center;
-    font-size: 13px;
-    opacity: .8;
-    line-height: 18px;
+.chat-item {
+    padding: 8px;
+    border-radius: 6px;
+    background: rgba(0,0,40,0.4);
+    border: 1px solid rgba(0,160,255,0.3);
+    font-size: 14px;
+    cursor: pointer;
+    transition: .2s;
+}
+.chat-item:hover {
+    background: rgba(0,0,60,0.6);
 }
 
 .main {
@@ -103,35 +83,21 @@ canvas {
     text-align: center;
     font-size: 24px;
     font-weight: 700;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     background: linear-gradient(90deg,#d400ff,#00d0ff);
     -webkit-background-clip: text;
     color: transparent;
-    text-shadow: 0 0 10px rgba(0,200,255,0.5);
-    animation: glow 4s infinite alternate;
-}
-
-@keyframes glow {
-    from {text-shadow: 0 0 10px rgba(0,200,255,0.3);}
-    to {text-shadow: 0 0 25px rgba(200,0,255,0.6);}
 }
 
 #chat {
     flex: 1;
-    background: rgba(0,0,30,0.55);
-    border: 1px solid rgba(150,0,255,0.35);
+    background: rgba(0,0,30,0.4);
+    border: 1px solid rgba(150,0,255,0.4);
     border-radius: 12px;
-    padding: 15px;
+    padding: 14px;
     overflow-y: auto;
-    margin-bottom: 12px;
-    backdrop-filter: blur(12px);
-    font-size: 14px;
-    animation: fadeIn 1.2s ease forwards;
-}
-
-@keyframes fadeIn {
-    from {opacity: 0;}
-    to {opacity: 1;}
+    margin-bottom: 10px;
+    backdrop-filter: blur(8px);
 }
 
 .msg-user, .msg-ai {
@@ -146,25 +112,22 @@ canvas {
     background: rgba(0,110,255,0.25);
     border: 1px solid rgba(0,170,255,0.6);
     margin-left: auto;
-    color: #00e1ff;
-    animation: msgPop .2s ease;
 }
 
 .msg-ai {
     background: rgba(150,0,255,0.25);
     border: 1px solid rgba(200,0,255,0.6);
-    color: #e2c5ff;
-    animation: msgPop .2s ease;
 }
 
-@keyframes msgPop {
-    from {transform: scale(0.96);}
-    to {transform: scale(1);}
+.typing {
+    opacity: 0.8;
+    font-style: italic;
+    padding: 10px;
 }
 
 .bottom {
     display: flex;
-    gap: 10px;
+    gap: 8px;
 }
 
 input {
@@ -172,22 +135,26 @@ input {
     padding: 14px;
     border-radius: 8px;
     border: 1px solid #8400ff;
-    background: rgba(15,0,40,0.85);
+    background: rgba(15,0,40,0.8);
     color:white;
     font-size: 15px;
-    outline: none;
 }
 
 button {
-    padding: 14px 18px;
+    padding: 14px 20px;
     border-radius: 8px;
     border: none;
     background: linear-gradient(90deg,#7b00ff,#00b7ff);
     color:white;
-    font-size: 15px;
     cursor:pointer;
     font-weight: 500;
-    box-shadow: 0 0 8px rgba(0,200,255,0.3);
+}
+
+.credit {
+    margin-top: auto;
+    text-align: center;
+    font-size: 12px;
+    opacity: .8;
 }
 </style>
 </head>
@@ -197,8 +164,9 @@ button {
 
 <div class="sidebar">
     <div class="new-chat" onclick="novoChat()">+ Novo Chat</div>
+    <div id="listaChats"></div>
 
-    <div class="baixo">
+    <div class="credit">
         © Créditos:<br>
         <b>Davi José</b>
     </div>
@@ -215,14 +183,19 @@ button {
 </div>
 
 <script>
+let chats = [];
+let currentChat = 0;
+novoChat();
+
 async function send() {
     const input = document.getElementById("txt");
     const user = input.value.trim();
     if (!user) return;
 
-    const box = document.getElementById("chat");
-    box.innerHTML += `<div class='msg-user'>${user}</div>`;
+    addMsg(user, "msg-user");
     input.value = "";
+
+    showTyping();
 
     const res = await fetch("https://axion-ia.dragonsjose0.workers.dev/", {
         method: "POST",
@@ -230,27 +203,82 @@ async function send() {
         body: JSON.stringify({ user })
     });
 
+    hideTyping();
     const data = await res.json();
-    const answer = data.choices?.[0]?.message?.content || "⚠️ Erro ao receber resposta.";
+    const answer = data.choices?.[0]?.message?.content || "Erro";
 
-    const html = marked.parse(answer);
-    box.innerHTML += `<div class='msg-ai'>${html}</div>`;
-    
-    box.scrollTop = box.scrollHeight;
+    addMsg(marked.parse(answer), "msg-ai", true);
     MathJax.typeset();
 }
 
-function novoChat() {
-    document.getElementById("chat").innerHTML = "<div class='msg-ai'> Novo chat iniciado.</div>";
+function addMsg(msg, cls, html=false){
+    const box = document.getElementById("chat");
+    box.innerHTML += `<div class='${cls}'>${html? msg : escape(msg)}</div>`;
+    box.scrollTop = box.scrollHeight;
 }
 
-const c=document.getElementById("bg"),ctx=c.getContext("2d");let w,h,p=[];
-function resize(){w=c.width=window.innerWidth;h=c.height=window.innerHeight;}
-window.addEventListener("resize",resize);resize();
-class Holo{constructor(){this.x=Math.random()*w;this.y=Math.random()*h;this.s=1+Math.random()*2;this.vx=(Math.random()-.5)*0.25;this.vy=(Math.random()-.5)*0.25;}update(){this.x+=this.vx;this.y+=this.vy;if(this.x<0||this.x>w)this.vx*=-1;if(this.y<0||this.y>h)this.vy*=-1;}draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.s,0,Math.PI*2);ctx.fillStyle="rgba(0,170,255,0.6)";ctx.fill();}}
-for(let i=0;i<80;i++)p.push(new Holo());
-function animate(){ctx.clearRect(0,0,w,h);p.forEach(o=>{o.update();o.draw();});requestAnimationFrame(animate);}
-animate();
+function novoChat(){
+    chats.push([]);
+    currentChat = chats.length - 1;
+
+    atualizarLista();
+    document.getElementById("chat").innerHTML = "";
+}
+
+function mudarChat(i){
+    currentChat = i;
+    document.getElementById("chat").innerHTML = chats[i].join("");
+}
+
+function atualizarLista(){
+    const div = document.getElementById("listaChats");
+    div.innerHTML = "";
+    chats.forEach((c,i)=>{
+        div.innerHTML += `<div class='chat-item' onclick='mudarChat(${i})'>⚛ Chat ${i+1}</div>`;
+    });
+}
+
+function showTyping(){
+    document.getElementById("chat").innerHTML += `<div id='typing' class='typing'>Axion está digitando...</div>`;
+}
+
+function hideTyping(){
+    const t = document.getElementById("typing");
+    if(t) t.remove();
+}
+
+/* EFEITO NEURAL */
+const c=document.getElementById("bg"),ctx=c.getContext("2d");
+let w,h,pts=[];
+function resize(){w=c.width=innerWidth;h=c.height=innerHeight;}
+resize();addEventListener("resize",resize);
+
+class Pt{
+    constructor(){this.x=Math.random()*w;this.y=Math.random()*h;this.vx=(Math.random()-.5)*0.3;this.vy=(Math.random()-.5)*0.3;}
+    upd(){this.x+=this.vx;this.y+=this.vy;if(this.x<0||this.x>w)this.vx*=-1;if(this.y<0||this.y>h)this.vy*=-1;}
+    draw(){ctx.beginPath();ctx.arc(this.x,this.y,2,0,6.28);ctx.fillStyle="rgba(0,200,255,0.8)";ctx.fill();}
+}
+for(let i=0;i<90;i++)pts.push(new Pt());
+
+function loop(){
+    ctx.clearRect(0,0,w,h);
+    pts.forEach(p=>p.upd());
+    for(let i=0;i<pts.length;i++){
+        for(let j=i+1;j<pts.length;j++){
+            let a=pts[i],b=pts[j],d=((a.x-b.x)**2+(a.y-b.y)**2)**0.5;
+            if(d<120){
+                ctx.strokeStyle=`rgba(0,200,255,${1-d/120})`;
+                ctx.beginPath();
+                ctx.moveTo(a.x,a.y);
+                ctx.lineTo(b.x,b.y);
+                ctx.stroke();
+            }
+        }
+        pts[i].draw();
+    }
+    requestAnimationFrame(loop);
+}
+loop();
 </script>
 
 </body>
