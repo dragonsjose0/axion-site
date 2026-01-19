@@ -2,144 +2,227 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Axion AI - Futuristic Assistant</title>
-<link rel="icon" type="image/png" href="icone.png"> <!-- ÍCONE AQUI -->
+<title>Axion AI - Neural Chat</title>
+
+<link rel="icon" type="image/png" href="logo.png">
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
 <style>
-    body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        background: #02010e;
-        background-size: cover;
-        color: white;
-        display: flex;
-        height: 100vh;
-        overflow: hidden;
-    }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap');
 
-    .sidebar {
-        width: 230px;
-        background: rgba(10, 0, 40, 0.75);
-        border-right: 2px solid #6b00ff;
-        padding: 15px;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        overflow-y: auto;
-    }
+* {
+    box-sizing: border-box;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0,200,255,0.4) transparent;
+}
 
-    .logo-area {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 20px;
-    }
+::-webkit-scrollbar {
+    width: 8px;
+}
 
-    .logo-area img {
-        width: 32px;
-        height: 32px;
-        filter: drop-shadow(0 0 6px #6b00ff);
-    }
+::-webkit-scrollbar-thumb {
+    background: rgba(0,200,255,0.4);
+    border-radius: 4px;
+}
 
-    .logo-area span {
-        font-size: 20px;
-        font-weight: bold;
-        background: linear-gradient(90deg,#6b00ff,#00b7ff);
-        -webkit-background-clip: text;
-        color: transparent;
-    }
+::-webkit-scrollbar-track {
+    background: transparent;
+}
 
-    .main {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-    }
+body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+    background: radial-gradient(circle at center, #09001f 0%, #000010 100%);
+    color: white;
+    font-family: 'Inter', sans-serif;
+}
 
-    .chat-window {
-        flex: 1;
-        overflow-y: auto;
-        padding: 15px;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
+canvas {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    opacity: 0.9;
+}
 
-    .bubble-user {
-        align-self: flex-end;
-        background: #004d7a;
-        padding: 10px;
-        border-radius: 8px;
-        max-width: 70%;
-    }
+.sidebar {
+    width: 240px;
+    background: rgba(12, 0, 40, 0.65);
+    border-right: 1px solid rgba(0, 200, 255, 0.25);
+    backdrop-filter: blur(10px);
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    animation: glassFade 1.4s ease forwards;
+}
 
-    .bubble-ai {
-        background: #170043;
-        border-left: 4px solid #6b00ff;
-        padding: 10px;
-        border-radius: 8px;
-        max-width: 70%;
-    }
+@keyframes glassFade {
+    from {opacity: 0; transform: translateX(-15px);}
+    to {opacity: 1; transform: translateX(0);}
+}
 
-    .input-area {
-        display: flex;
-        border-top: 2px solid #6b00ff;
-    }
+.new-chat {
+    padding: 12px;
+    border-radius: 8px;
+    background: linear-gradient(90deg,#7b00ff,#00b7ff);
+    border: none;
+    font-weight: 600;
+    text-align: center;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(0,200,255,0.3);
+}
 
-    .input-area input {
-        flex: 1;
-        padding: 12px;
-        background: #08001e;
-        border: none;
-        color: white;
-        font-size: 16px;
-    }
+.baixo {
+    margin-top: auto;
+    text-align: center;
+    font-size: 13px;
+    opacity: .8;
+    line-height: 18px;
+}
 
-    .input-area button {
-        width: 130px;
-        background: linear-gradient(90deg,#6b00ff,#00b7ff);
-        border: none;
-        color: white;
-        font-size: 16px;
-        cursor: pointer;
-    }
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 20px;
+    overflow: hidden;
+}
 
-    .credits {
-        margin-top: auto;
-        font-size: 12px;
-        opacity: 0.7;
-        text-align: center;
-    }
+.logo {
+    text-align: center;
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    background: linear-gradient(90deg,#d400ff,#00d0ff);
+    -webkit-background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 10px rgba(0,200,255,0.5);
+    animation: glow 4s infinite alternate;
+}
+
+@keyframes glow {
+    from {text-shadow: 0 0 10px rgba(0,200,255,0.3);}
+    to {text-shadow: 0 0 25px rgba(200,0,255,0.6);}
+}
+
+#chat {
+    flex: 1;
+    background: rgba(0,0,30,0.55);
+    border: 1px solid rgba(150,0,255,0.35);
+    border-radius: 12px;
+    padding: 15px;
+    overflow-y: auto;
+    margin-bottom: 12px;
+    backdrop-filter: blur(12px);
+    font-size: 14px;
+    animation: fadeIn 1.2s ease forwards;
+}
+
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+.msg-user, .msg-ai {
+    padding: 10px 12px;
+    border-radius: 10px;
+    max-width: 85%;
+    margin-bottom: 12px;
+    line-height: 1.4em;
+}
+
+.msg-user {
+    background: rgba(0,110,255,0.25);
+    border: 1px solid rgba(0,170,255,0.6);
+    margin-left: auto;
+    color: #00e1ff;
+    animation: msgPop .2s ease;
+}
+
+.msg-ai {
+    background: rgba(150,0,255,0.25);
+    border: 1px solid rgba(200,0,255,0.6);
+    color: #e2c5ff;
+    animation: msgPop .2s ease;
+}
+
+@keyframes msgPop {
+    from {transform: scale(0.96);}
+    to {transform: scale(1);}
+}
+
+.bottom {
+    display: flex;
+    gap: 10px;
+}
+
+input {
+    flex: 1;
+    padding: 14px;
+    border-radius: 8px;
+    border: 1px solid #8400ff;
+    background: rgba(15,0,40,0.85);
+    color:white;
+    font-size: 15px;
+    outline: none;
+}
+
+button {
+    padding: 14px 18px;
+    border-radius: 8px;
+    border: none;
+    background: linear-gradient(90deg,#7b00ff,#00b7ff);
+    color:white;
+    font-size: 15px;
+    cursor:pointer;
+    font-weight: 500;
+    box-shadow: 0 0 8px rgba(0,200,255,0.3);
+}
 </style>
 </head>
 <body>
 
-<div class="sidebar">
-    <div class="logo-area">
-        <img src="icone.png" alt="Axion Logo">
-        <span>AXION</span>
-    </div>
+<canvas id="bg"></canvas>
 
-    <div class="credits">
-        Desenvolvido por <b>Davi José</b>
+<div class="sidebar">
+    <div class="new-chat" onclick="novoChat()">+ Novo Chat</div>
+
+    <div class="baixo">
+        © Créditos:<br>
+        <b>Davi José</b>
     </div>
 </div>
 
 <div class="main">
-    <div id="chat" class="chat-window"></div>
+    <div class="logo">⚛ AXION NEURAL AI</div>
+    <div id="chat"></div>
 
-    <div class="input-area">
-        <input id="txt" placeholder="Digite sua pergunta...">
+    <div class="bottom">
+        <input id="txt" placeholder="Digite sua mensagem...">
         <button onclick="send()">Enviar</button>
     </div>
 </div>
 
 <script>
 async function send() {
-    const user = txt.value.trim();
+    const input = document.getElementById("txt");
+    const user = input.value.trim();
     if (!user) return;
 
-    addBubble(user, "user");
-    txt.value = "";
+    const box = document.getElementById("chat");
+    box.innerHTML += `<div class='msg-user'>${user}</div>`;
+    input.value = "";
 
     const res = await fetch("https://axion-ia.dragonsjose0.workers.dev/", {
         method: "POST",
@@ -148,19 +231,28 @@ async function send() {
     });
 
     const data = await res.json();
-    const text = data.choices?.[0]?.message?.content || "⚠️ Erro ao obter resposta.";
+    const answer = data.choices?.[0]?.message?.content || "⚠️ Erro ao receber resposta.";
 
-    addBubble(text, "ai");
+    const html = marked.parse(answer);
+    box.innerHTML += `<div class='msg-ai'>${html}</div>`;
+    
+    box.scrollTop = box.scrollHeight;
+    MathJax.typeset();
 }
 
-function addBubble(msg, who) {
-    const div = document.createElement("div");
-    div.className = who === "user" ? "bubble-user" : "bubble-ai";
-    div.innerHTML = msg;
-    chat.appendChild(div);
-    chat.scrollTop = chat.scrollHeight;
+function novoChat() {
+    document.getElementById("chat").innerHTML = "<div class='msg-ai'> Novo chat iniciado.</div>";
 }
+
+const c=document.getElementById("bg"),ctx=c.getContext("2d");let w,h,p=[];
+function resize(){w=c.width=window.innerWidth;h=c.height=window.innerHeight;}
+window.addEventListener("resize",resize);resize();
+class Holo{constructor(){this.x=Math.random()*w;this.y=Math.random()*h;this.s=1+Math.random()*2;this.vx=(Math.random()-.5)*0.25;this.vy=(Math.random()-.5)*0.25;}update(){this.x+=this.vx;this.y+=this.vy;if(this.x<0||this.x>w)this.vx*=-1;if(this.y<0||this.y>h)this.vy*=-1;}draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.s,0,Math.PI*2);ctx.fillStyle="rgba(0,170,255,0.6)";ctx.fill();}}
+for(let i=0;i<80;i++)p.push(new Holo());
+function animate(){ctx.clearRect(0,0,w,h);p.forEach(o=>{o.update();o.draw();});requestAnimationFrame(animate);}
+animate();
 </script>
 
 </body>
 </html>
+
