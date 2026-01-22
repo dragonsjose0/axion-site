@@ -12,7 +12,7 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap');
 
-* { box-sizing: border-box; scrollbar-width: thin; scrollbar-color: transparent transparent; }
+* { box-sizing: border-box; }
 
 body {
     margin: 0;
@@ -24,16 +24,11 @@ body {
     font-family: 'Inter', sans-serif;
 }
 
-*::-webkit-scrollbar { width: 6px; background: transparent; }
-*::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.0); }
-
 canvas {
     position: fixed;
     width: 100%;
     height: 100%;
     z-index: -1;
-    top: 0;
-    left: 0;
 }
 
 .sidebar {
@@ -63,19 +58,13 @@ canvas {
     border: 1px solid rgba(0,160,255,0.3);
     font-size: 14px;
     cursor: pointer;
-    transition: .2s;
-}
-.chat-item:hover {
-    background: rgba(0,0,60,0.6);
 }
 
 .main {
     flex: 1;
     display: flex;
     flex-direction: column;
-    height: 100vh;
     padding: 20px;
-    overflow: hidden;
 }
 
 .logo {
@@ -96,7 +85,6 @@ canvas {
     padding: 14px;
     overflow-y: auto;
     margin-bottom: 10px;
-    backdrop-filter: blur(8px);
 }
 
 .msg-user, .msg-ai {
@@ -104,24 +92,20 @@ canvas {
     border-radius: 10px;
     max-width: 85%;
     margin-bottom: 12px;
-    line-height: 1.4em;
 }
 
 .msg-user {
     background: rgba(0,110,255,0.25);
-    border: 1px solid rgba(0,170,255,0.6);
     margin-left: auto;
 }
 
 .msg-ai {
     background: rgba(150,0,255,0.25);
-    border: 1px solid rgba(200,0,255,0.6);
 }
 
 .typing {
-    opacity: 0.8;
+    opacity: 0.7;
     font-style: italic;
-    padding: 10px;
 }
 
 .bottom {
@@ -136,7 +120,6 @@ input {
     border: 1px solid #8400ff;
     background: rgba(15,0,40,0.8);
     color:white;
-    font-size: 15px;
 }
 
 button {
@@ -146,17 +129,10 @@ button {
     background: linear-gradient(90deg,#7b00ff,#00b7ff);
     color:white;
     cursor:pointer;
-    font-weight: 500;
-}
-
-.credit {
-    margin-top: auto;
-    text-align: center;
-    font-size: 12px;
-    opacity: .8;
 }
 </style>
 </head>
+
 <body>
 
 <canvas id="bg"></canvas>
@@ -164,10 +140,8 @@ button {
 <div class="sidebar">
     <div class="new-chat" onclick="novoChat()">+ Novo Chat</div>
     <div id="listaChats"></div>
-
-    <div class="credit">
-        © Créditos:<br>
-        <b>Davi José</b>
+    <div style="margin-top:auto;text-align:center;font-size:12px;">
+        © Créditos<br><b>Davi José</b>
     </div>
 </div>
 
@@ -199,26 +173,22 @@ async function send() {
     showTyping();
 
     const res = await fetch("https://axion-groq.dragonsjose0.workers.dev/", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ user })
-});
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user })
     });
 
     hideTyping();
+
     const data = await res.json();
-    const answer = data.choices?.[0]?.message?.content || "Erro";
+    const answer = data.choices?.[0]?.message?.content || "Erro ao responder";
 
     addMsg(marked.parse(answer), "msg-ai", true);
     MathJax.typeset();
 }
 
 function addMsg(msg, cls, html=false){
-    const formatted = `<div class='${cls}'>${html ? msg : msg}</div>`;
-
+    const formatted = `<div class="${cls}">${html ? msg : msg}</div>`;
     chats[currentChat].push(formatted);
     renderChat();
 }
@@ -244,39 +214,56 @@ function mudarChat(i){
 function atualizarLista(){
     const div = document.getElementById("listaChats");
     div.innerHTML = "";
-    chats.forEach((c,i)=>{
-        div.innerHTML += `<div class='chat-item' onclick='mudarChat(${i})'>⚛ Chat ${i+1}</div>`;
+    chats.forEach((_,i)=>{
+        div.innerHTML += `<div class="chat-item" onclick="mudarChat(${i})">⚛ Chat ${i+1}</div>`;
     });
 }
 
 function showTyping(){
-    chats[currentChat].push(`<div id='typing' class='typing'>Axion está digitando...</div>`);
+    chats[currentChat].push(`<div class="typing">Axion está digitando...</div>`);
     renderChat();
 }
 
 function hideTyping(){
-    chats[currentChat] = chats[currentChat].filter(e => !e.includes("typing"));
+    chats[currentChat] = chats[currentChat].filter(e => !e.includes("digitando"));
     renderChat();
 }
 
+/* FUNDO NEURAL */
 const c=document.getElementById("bg"),ctx=c.getContext("2d");
 let w,h,pts=[];
 function resize(){w=c.width=innerWidth;h=c.height=innerHeight;}
 resize();addEventListener("resize",resize);
 
 class Pt{
-    constructor(){this.x=Math.random()*w;this.y=Math.random()*h;this.vx=(Math.random()-.5)*0.3;this.vy=(Math.random()-.5)*0.3;}
-    upd(){this.x+=this.vx;this.y+=this.vy;if(this.x<0||this.x>w)this.vx*=-1;if(this.y<0||this.y>h)this.vy*=-1;}
-    draw(){ctx.beginPath();ctx.arc(this.x,this.y,2,0,6.28);ctx.fillStyle="rgba(0,200,255,0.8)";ctx.fill();}
+    constructor(){
+        this.x=Math.random()*w;
+        this.y=Math.random()*h;
+        this.vx=(Math.random()-.5)*0.3;
+        this.vy=(Math.random()-.5)*0.3;
+    }
+    upd(){
+        this.x+=this.vx;
+        this.y+=this.vy;
+        if(this.x<0||this.x>w) this.vx*=-1;
+        if(this.y<0||this.y>h) this.vy*=-1;
+    }
+    draw(){
+        ctx.beginPath();
+        ctx.arc(this.x,this.y,2,0,6.28);
+        ctx.fillStyle="rgba(0,200,255,0.8)";
+        ctx.fill();
+    }
 }
-for(let i=0;i<90;i++)pts.push(new Pt());
+for(let i=0;i<90;i++) pts.push(new Pt());
 
 function loop(){
     ctx.clearRect(0,0,w,h);
     pts.forEach(p=>p.upd());
     for(let i=0;i<pts.length;i++){
         for(let j=i+1;j<pts.length;j++){
-            let a=pts[i],b=pts[j],d=((a.x-b.x)**2+(a.y-b.y)**2)**0.5;
+            let a=pts[i],b=pts[j];
+            let d=Math.hypot(a.x-b.x,a.y-b.y);
             if(d<120){
                 ctx.strokeStyle=`rgba(0,200,255,${1-d/120})`;
                 ctx.beginPath();
@@ -294,4 +281,3 @@ loop();
 
 </body>
 </html>
-
