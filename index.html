@@ -2,613 +2,652 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AXION | NEON LEGACY</title>
-
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E⚛%3C/text%3E%3C/svg%3E">
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AXION | NEON OS</title>
+    
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <style>
         :root {
-            /* PALETA NEON OLD SCHOOL */
-            --primary: #00f3ff;       /* Cyan Elétrico */
-            --secondary: #bc13fe;     /* Roxo Neon */
-            --bg-dark: #050505;       /* Quase preto */
-            --panel-bg: rgba(10, 15, 20, 0.85);
-            --border-glow: 0 0 10px rgba(0, 243, 255, 0.3);
-            --text-glow: 0 0 5px rgba(0, 243, 255, 0.5);
-            --glass: rgba(0, 243, 255, 0.05);
+            /* CORES PADRÃO (CYAN/ROXO) */
+            --primary: #00f3ff;
+            --secondary: #bc13fe;
+            --bg-color: #030305;
+            --panel-bg: rgba(10, 15, 20, 0.7);
+            
+            /* CORES MODO TEMPORÁRIO (ROSA/VERMELHO) */
+            --temp-primary: #ff0055;
+            --temp-secondary: #ffae00;
+
+            /* VARIÁVEIS ATIVAS (Mudam via JS) */
+            --neon-main: var(--primary);
+            --neon-sec: var(--secondary);
+            
+            --glass: rgba(255, 255, 255, 0.03);
+            --border-glow: 0 0 10px rgba(0, 243, 255, 0.2);
         }
 
-        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
-        
+        /* --- BASE --- */
+        * { box-sizing: border-box; outline: none; user-select: none; }
         body {
             margin: 0; height: 100vh; overflow: hidden;
             font-family: 'Rajdhani', sans-serif;
-            background: var(--bg-dark); color: #e0e0e0;
+            background: var(--bg-color); color: #fff;
             display: flex;
+            transition: 0.5s ease;
         }
 
-        /* FUNDO PARTICULAS */
-        canvas#bg { position: fixed; inset: 0; z-index: -1; opacity: 0.4; }
+        /* Animação de Fundo (Scanlines) */
+        body::after {
+            content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2; background-size: 100% 2px, 3px 100%; pointer-events: none;
+        }
 
-        /* SCROLLBAR CYBERPUNK */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #000; }
-        ::-webkit-scrollbar-thumb { background: #333; border: 1px solid var(--primary); }
-        ::-webkit-scrollbar-thumb:hover { background: var(--primary); box-shadow: 0 0 10px var(--primary); }
+        canvas#bg { position: fixed; inset: 0; z-index: 0; opacity: 0.6; }
 
-        /* --- TELA DE LOGIN (TIPO TERMINAL) --- */
-        #login-overlay {
+        /* --- TELA DE LOGIN --- */
+        #login-screen {
             position: fixed; inset: 0; z-index: 9999;
             background: #000;
-            display: flex; align-items: center; justify-content: center;
-            transition: opacity 0.6s ease-in-out;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.8s;
         }
-        
-        .login-box {
-            width: 90%; max-width: 400px; padding: 40px;
-            border: 1px solid var(--primary);
-            box-shadow: 0 0 30px rgba(0, 243, 255, 0.1), inset 0 0 20px rgba(0, 243, 255, 0.05);
-            background: rgba(0,0,0,0.9);
-            text-align: center; position: relative;
-            overflow: hidden;
+        .login-frame {
+            border: 1px solid var(--neon-main);
+            padding: 40px; width: 400px; text-align: center;
+            background: rgba(0,0,0,0.8);
+            box-shadow: 0 0 30px var(--neon-main), inset 0 0 20px rgba(0,0,0,0.5);
+            position: relative; overflow: hidden;
         }
-
-        .login-box::before {
-            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 2px;
-            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+        .scan-line {
+            position: absolute; top: 0; left: -100%; width: 100%; height: 5px;
+            background: var(--neon-main); opacity: 0.5;
             animation: scan 2s linear infinite;
         }
-        @keyframes scan { 0% { left: -100%; } 100% { left: 100%; } }
+        @keyframes scan { 0% {left: -100%;} 100% {left: 100%;} }
 
         .login-input {
-            width: 100%; padding: 15px; margin-top: 30px;
-            background: rgba(255,255,255,0.05); border: 1px solid #333;
-            color: var(--primary); font-family: 'Share Tech Mono'; font-size: 1.2em;
-            text-align: center; transition: 0.3s;
+            width: 100%; background: transparent; border: none; border-bottom: 2px solid #333;
+            color: var(--neon-main); font-family: 'Share Tech Mono'; font-size: 1.5rem;
+            text-align: center; margin: 30px 0; padding: 10px;
+            transition: 0.3s;
         }
-        .login-input:focus { border-color: var(--primary); box-shadow: 0 0 15px var(--primary); }
-
-        .btn-neon {
-            margin-top: 25px; padding: 12px 40px;
-            background: transparent; border: 1px solid var(--primary);
-            color: var(--primary); font-family: 'Share Tech Mono'; font-size: 1em;
-            cursor: pointer; transition: 0.3s; text-transform: uppercase;
-            letter-spacing: 2px; position: relative; overflow: hidden;
+        .login-input:focus { border-color: var(--neon-main); text-shadow: 0 0 10px var(--neon-main); }
+        
+        .btn-start {
+            background: var(--neon-main); color: #000; border: none; padding: 10px 30px;
+            font-family: 'Share Tech Mono'; font-weight: bold; cursor: pointer;
+            letter-spacing: 2px; transition: 0.3s; clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
         }
-        .btn-neon:hover { background: var(--primary); color: #000; box-shadow: 0 0 25px var(--primary); }
+        .btn-start:hover { transform: scale(1.05); box-shadow: 0 0 20px var(--neon-main); }
 
         /* --- SIDEBAR --- */
         .sidebar {
-            width: 260px; background: rgba(5, 5, 8, 0.95);
+            width: 280px; background: rgba(5, 5, 10, 0.9);
             border-right: 1px solid rgba(255,255,255,0.1);
-            display: flex; flex-direction: column; z-index: 100;
+            display: flex; flex-direction: column; z-index: 10;
             backdrop-filter: blur(10px);
+            transition: 0.3s;
         }
 
-        .user-profile {
+        .user-card {
             padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1);
             display: flex; align-items: center; gap: 15px;
         }
         .avatar {
-            width: 40px; height: 40px; border-radius: 50%;
-            border: 2px solid var(--primary);
+            width: 45px; height: 45px; border-radius: 50%;
+            border: 2px solid var(--neon-main);
             display: flex; align-items: center; justify-content: center;
-            font-weight: bold; color: var(--primary);
-            box-shadow: 0 0 10px var(--primary);
-            text-shadow: 0 0 5px var(--primary);
+            font-weight: bold; color: var(--neon-main); text-shadow: 0 0 5px var(--neon-main);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
         }
 
-        .new-chat-btn {
-            margin: 20px; padding: 12px;
-            border: 1px dashed rgba(255,255,255,0.2);
-            color: #aaa; cursor: pointer; text-align: center;
-            font-family: 'Share Tech Mono'; transition: 0.3s;
+        .controls-row {
+            display: flex; padding: 15px; gap: 10px;
         }
-        .new-chat-btn:hover { border-color: var(--primary); color: var(--primary); text-shadow: 0 0 8px var(--primary); }
+        .btn-control {
+            flex: 1; border: 1px solid rgba(255,255,255,0.2); background: transparent;
+            color: #aaa; padding: 8px; cursor: pointer; font-family: 'Share Tech Mono';
+            transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 5px;
+        }
+        .btn-control:hover { border-color: var(--neon-main); color: var(--neon-main); box-shadow: 0 0 10px rgba(0, 243, 255, 0.1); }
+        
+        /* Botão Temporário */
+        .btn-temp { border-color: var(--temp-primary); color: var(--temp-primary); opacity: 0.5; }
+        .btn-temp.active { opacity: 1; background: rgba(255, 0, 85, 0.1); box-shadow: 0 0 15px var(--temp-primary); text-shadow: 0 0 5px var(--temp-primary); }
 
-        .history-list { flex: 1; overflow-y: auto; padding: 10px; }
+        .chat-list { flex: 1; overflow-y: auto; padding: 10px; }
         .chat-item {
-            padding: 12px; margin-bottom: 5px; border-left: 2px solid transparent;
-            font-size: 0.9em; cursor: pointer; color: #888;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            transition: 0.2s; font-family: 'Share Tech Mono';
+            padding: 12px; margin-bottom: 5px; border-radius: 4px;
+            font-family: 'Share Tech Mono'; font-size: 0.9em; color: #888;
+            cursor: pointer; transition: 0.2s; position: relative;
+            display: flex; justify-content: space-between; align-items: center;
         }
-        .chat-item:hover { color: #fff; background: rgba(255,255,255,0.02); }
-        .chat-item.active { 
-            color: var(--primary); border-left-color: var(--primary); 
-            background: linear-gradient(90deg, rgba(0,243,255,0.1), transparent);
+        .chat-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+        .chat-item.active { background: linear-gradient(90deg, rgba(0,243,255,0.1), transparent); border-left: 2px solid var(--neon-main); color: var(--neon-main); }
+        
+        .chat-actions { display: none; gap: 5px; }
+        .chat-item:hover .chat-actions { display: flex; }
+        .action-icon {
+            width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+            border-radius: 4px; transition: 0.2s; color: #fff;
         }
+        .action-icon:hover { background: rgba(255,255,255,0.2); transform: scale(1.1); }
+        .action-del:hover { color: #ff3333; }
 
         /* --- MAIN AREA --- */
-        .main { 
-            flex: 1; display: flex; flex-direction: column; position: relative; 
-            background: radial-gradient(circle at center, #1a1a20 0%, #000 100%);
-        }
+        .main { flex: 1; display: flex; flex-direction: column; position: relative; z-index: 5; }
+        
+        /* Chat View */
+        #chat-view { flex: 1; overflow-y: auto; padding: 40px 15% 20px 15%; display: flex; flex-direction: column; }
+        
+        .msg { margin-bottom: 25px; animation: fadeIn 0.3s; display: flex; flex-direction: column; }
+        @keyframes fadeIn { from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:translateY(0)} }
+        
+        .msg.user { align-items: flex-end; }
+        .msg.ai { align-items: flex-start; }
 
-        /* TELA DE BOAS VINDAS (Estilo ChatGPT, mas Neon) */
-        #landing-view {
-            flex: 1; display: flex; flex-direction: column; 
-            align-items: center; justify-content: center;
-            opacity: 1; transition: 0.4s;
-            text-align: center;
+        .bubble {
+            max-width: 80%; padding: 15px 20px; border-radius: 8px;
+            line-height: 1.6; position: relative; font-size: 1rem; user-select: text;
         }
-        .neon-logo-large {
-            font-size: 80px; color: var(--bg-dark);
-            -webkit-text-stroke: 2px var(--primary);
-            text-shadow: 0 0 20px var(--primary);
-            margin-bottom: 20px; animation: pulse 3s infinite;
+        .msg.user .bubble {
+            background: rgba(0, 243, 255, 0.05); border: 1px solid var(--neon-main);
+            color: #fff; border-bottom-right-radius: 0;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.05);
         }
-        @keyframes pulse { 50% { text-shadow: 0 0 40px var(--primary); } }
-
-        .suggestion-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
-            margin-top: 40px; max-width: 600px; width: 90%;
-        }
-        .suggestion-card {
-            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);
-            padding: 15px; border-radius: 8px; cursor: pointer; text-align: left;
-            transition: 0.3s; font-size: 0.9em; color: #aaa;
-        }
-        .suggestion-card:hover { border-color: var(--secondary); box-shadow: 0 0 15px var(--secondary); color: white; transform: translateY(-2px); }
-
-        /* ÁREA DO CHAT */
-        #chat-container {
-            display: none; flex: 1; flex-direction: column; overflow-y: auto;
-            padding: 40px 15% 20px 15%; scroll-behavior: smooth;
+        .msg.ai .bubble {
+            background: rgba(255,255,255,0.02); border-left: 2px solid var(--neon-sec);
+            color: #ddd; padding-left: 20px;
         }
         
-        .msg-row { display: flex; margin-bottom: 30px; animation: slideIn 0.3s forwards; }
-        @keyframes slideIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-        
-        .msg-row.user { justify-content: flex-end; }
-        
-        .msg-content {
-            max-width: 80%; padding: 15px 20px; line-height: 1.6;
-            font-size: 1rem; border-radius: 12px; position: relative;
+        /* Input Area */
+        .input-container {
+            padding: 20px 15%; background: linear-gradient(to top, #000, transparent);
         }
-        
-        .msg-row.user .msg-content {
-            background: rgba(0, 243, 255, 0.1); border: 1px solid var(--primary);
-            color: #fff; border-bottom-right-radius: 2px;
-            box-shadow: 0 0 10px rgba(0, 243, 255, 0.1);
-        }
-        
-        .msg-row.ai .msg-content {
-            background: transparent; border-left: 2px solid var(--secondary);
-            color: #ddd; padding-left: 15px;
-        }
-
-        /* --- INPUT AREA (MODERNA C/ TOQUE RETRO) --- */
-        .input-area-wrapper {
-            width: 100%; padding: 20px 15%;
-            background: linear-gradient(to top, #000 80%, transparent);
-            position: relative; z-index: 50;
-        }
-
         .input-box {
-            background: #0a0a0f; border: 1px solid #333;
-            border-radius: 12px; padding: 10px;
-            display: flex; flex-direction: column;
-            transition: 0.3s; box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            background: #08080a; border: 1px solid #333; border-radius: 12px;
+            padding: 10px; display: flex; flex-direction: column;
+            transition: 0.3s; position: relative;
         }
-        .input-box:focus-within { border-color: var(--primary); box-shadow: 0 0 20px rgba(0, 243, 255, 0.15); }
+        .input-box:focus-within { border-color: var(--neon-main); box-shadow: 0 0 20px rgba(0, 243, 255, 0.1); }
+        
+        /* Modo Temporário Visual */
+        body.temp-mode { --neon-main: var(--temp-primary); --neon-sec: var(--temp-secondary); }
+        body.temp-mode .sidebar { border-right: 1px solid var(--temp-primary); }
+        body.temp-mode .input-box { border-color: var(--temp-primary); }
 
         textarea {
             width: 100%; background: transparent; border: none; color: white;
-            resize: none; font-family: 'Rajdhani'; font-size: 1.1rem;
-            padding: 10px; min-height: 40px; max-height: 200px;
+            resize: none; font-family: 'Rajdhani'; font-size: 1.1rem; padding: 10px;
+            min-height: 50px;
         }
 
-        .input-footer {
+        .toolbar {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 5px 5px 0 5px; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 5px;
+            border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px; margin-top: 5px;
         }
 
-        /* BOTÕES FERRAMENTAS */
-        .tools-left { display: flex; gap: 10px; }
-        .tool-icon {
-            color: #666; cursor: pointer; transition: 0.2s;
-            width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+        .tools { display: flex; gap: 15px; color: #666; }
+        .tool-btn { cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 5px; font-size: 0.8em; }
+        .tool-btn:hover { color: var(--neon-main); text-shadow: 0 0 5px var(--neon-main); }
+        
+        .model-selector {
+            background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 4px;
+            font-family: 'Share Tech Mono'; font-size: 0.8em; cursor: pointer;
+            border: 1px solid transparent; color: var(--neon-sec);
+            display: flex; align-items: center; gap: 5px;
         }
-        .tool-icon:hover { color: var(--primary); text-shadow: 0 0 8px var(--primary); }
+        .model-selector:hover { border-color: var(--neon-sec); box-shadow: 0 0 10px rgba(188, 19, 254, 0.2); }
 
-        /* SELETOR DE MODELO E ENVIAR */
-        .right-controls { display: flex; align-items: center; gap: 10px; }
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--neon-main); }
 
-        .model-select-wrapper { position: relative; }
-        .model-btn {
-            background: rgba(255,255,255,0.05); border: 1px solid #333;
-            color: #888; padding: 5px 10px; border-radius: 4px;
-            font-size: 0.8em; font-family: 'Share Tech Mono'; cursor: pointer;
-            display: flex; align-items: center; gap: 5px; transition: 0.3s;
+        /* Ícones SVG simples */
+        .icon { width: 16px; height: 16px; fill: currentColor; }
+
+        /* Overlay de Edição */
+        .edit-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100;
+            display: none; align-items: center; justify-content: center;
         }
-        .model-btn:hover, .model-btn.active { border-color: var(--secondary); color: var(--secondary); box-shadow: 0 0 10px rgba(188, 19, 254, 0.2); }
-        .bolt-icon { font-size: 1.2em; }
-
-        /* Menu Dropup do Modelo */
-        .model-menu {
-            position: absolute; bottom: 120%; right: 0;
-            background: #0f0f15; border: 1px solid var(--secondary);
-            width: 180px; display: none; flex-direction: column;
-            box-shadow: 0 0 20px rgba(188, 19, 254, 0.1);
-            z-index: 100;
+        .edit-box {
+            background: #111; border: 1px solid var(--neon-main); padding: 20px;
+            width: 300px; text-align: center;
         }
-        .model-menu.show { display: flex; }
-        .model-option {
-            padding: 10px; color: #aaa; cursor: pointer; font-size: 0.85em; font-family: 'Share Tech Mono';
-            display: flex; justify-content: space-between;
-        }
-        .model-option:hover { background: rgba(188, 19, 254, 0.2); color: white; }
-        .model-option.selected { color: var(--secondary); }
 
-        .send-btn {
-            background: var(--primary); color: #000; border: none;
-            width: 32px; height: 32px; border-radius: 6px;
-            cursor: pointer; display: flex; align-items: center; justify-content: center;
-            transition: 0.2s;
-        }
-        .send-btn:hover { box-shadow: 0 0 15px var(--primary); transform: scale(1.1); }
-
-        /* RESPONSIVO */
-        @media (max-width: 768px) {
-            .sidebar { position: fixed; height: 100%; transform: translateX(-100%); transition: 0.3s; }
+        @media(max-width: 768px) {
+            .sidebar { position: fixed; transform: translateX(-100%); height: 100%; }
             .sidebar.open { transform: translateX(0); }
-            #chat-container, .input-area-wrapper { padding-left: 20px; padding-right: 20px; }
-            .neon-logo-large { font-size: 50px; }
+            #chat-view, .input-container { padding-left: 20px; padding-right: 20px; }
         }
-
     </style>
 </head>
-
 <body>
 
     <canvas id="bg"></canvas>
 
-    <div id="login-overlay">
-        <div class="login-box">
-            <div style="font-size: 3rem; color: var(--primary); margin-bottom:10px;">⚛</div>
-            <h2 style="font-weight: 300; letter-spacing: 4px; margin: 0; color:white;">AXION <span style="color:var(--secondary)">OS</span></h2>
-            <div style="font-family:'Share Tech Mono'; color:#555; font-size:0.8em; margin-bottom:20px;">SYSTEM V3.1 // LEGACY MODE</div>
+    <div id="login-screen">
+        <div class="login-frame">
+            <h1 style="margin: 0; font-weight: 300; letter-spacing: 5px; color:#fff;">AXION <span style="color:var(--neon-main)">OS</span></h1>
+            <div style="font-family:'Share Tech Mono'; color:#666; font-size:0.8rem; margin-top:5px;">SYSTEM SECURE LOGIN v4.0</div>
             
-            <input type="text" id="usernameInput" class="login-input" placeholder="IDENTITY_KEY" autocomplete="off" onkeydown="if(event.key==='Enter') login()">
+            <div class="scan-line"></div>
             
-            <button class="btn-neon" onclick="login()">INITIALIZE</button>
+            <input type="text" id="username" class="login-input" placeholder="IDENTIFICATION" autocomplete="off" onkeypress="if(event.key==='Enter') login()">
+            
+            <button class="btn-start" onclick="login()">INITIALIZE SYSTEM</button>
         </div>
     </div>
 
     <div class="sidebar" id="sidebar">
-        <div class="user-profile">
-            <div class="avatar" id="userAvatar">ID</div>
+        <div class="user-card">
+            <div class="avatar" id="display-avatar">U</div>
             <div>
-                <div id="userNameDisplay" style="font-size:1em; font-weight:600; color:#fff;">User</div>
-                <div style="font-size:0.7em; color:var(--primary); font-family:'Share Tech Mono'">● ONLINE</div>
+                <div id="display-name" style="font-weight:700; letter-spacing: 1px;">USER</div>
+                <div style="font-size:0.7em; color:var(--neon-main); font-family:'Share Tech Mono'">● ONLINE</div>
             </div>
         </div>
-        
-        <div class="new-chat-btn" onclick="resetToLanding()">+ NEW SESSION</div>
-        
-        <div class="history-list" id="historyList"></div>
+
+        <div class="controls-row">
+            <button class="btn-control" onclick="newChat()"><span>+</span> NEW</button>
+            <button class="btn-control btn-temp" id="temp-btn" onclick="toggleTempMode()" title="Modo Temporário (Não salva)">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+            </button>
+        </div>
+
+        <div class="chat-list" id="history">
+            </div>
     </div>
 
     <div class="main">
-
-        <div id="landing-view">
-            <div class="neon-logo-large">AXION</div>
-            <div style="font-size: 1.5rem; font-weight: 300;">Como posso ajudar você hoje?</div>
-            
-            <div class="suggestion-grid">
-                <div class="suggestion-card" onclick="setInput('Analise este código Python em busca de bugs.')">
-                    <div style="color:var(--secondary); margin-bottom:5px;">&lt;/&gt; Code Analysis</div>
-                    Encontrar bugs em script Python
-                </div>
-                <div class="suggestion-card" onclick="setInput('Crie uma história cyberpunk sobre uma IA rebelde.')">
-                    <div style="color:var(--primary); margin-bottom:5px;">✎ Creative Writing</div>
-                    História Cyberpunk sobre IA
-                </div>
-                <div class="suggestion-card" onclick="setInput('Explique a teoria da relatividade como se eu tivesse 5 anos.')">
-                    <div style="color:var(--secondary); margin-bottom:5px;">⚛ Science</div>
-                    Explicar Relatividade simples
-                </div>
-                <div class="suggestion-card" onclick="setInput('Dicas para melhorar a segurança da minha rede.')">
-                    <div style="color:var(--primary); margin-bottom:5px;">🛡️ Security</div>
-                    Dicas de Cybersecurity
-                </div>
+        <div id="chat-view">
+            <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; opacity:0.7; text-align:center;" id="welcome-msg">
+                <div style="font-size:4rem; color:var(--neon-main); text-shadow:0 0 30px var(--neon-main);">AXION</div>
+                <p>SELECIONE UM MODO. INICIE.</p>
             </div>
         </div>
 
-        <div id="chat-container"></div>
-
-        <div class="input-area-wrapper">
+        <div class="input-container">
             <div class="input-box">
-                <textarea id="userInput" placeholder="Envie uma mensagem..." rows="1" oninput="autoResize(this)" onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault(); sendMsg();}"></textarea>
+                <textarea id="prompt" placeholder="Digite seu comando..." rows="1" oninput="resize(this)" onkeydown="checkEnter(event)"></textarea>
                 
-                <div class="input-footer">
-                    <div class="tools-left">
-                        <div class="tool-icon" title="Upload Imagem"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
-                        <div class="tool-icon" title="Web Search"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+                <div class="toolbar">
+                    <div class="tools">
+                        <div class="tool-btn" onclick="triggerAction('search')">
+                            <svg class="icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                            WEB
+                        </div>
+                        <div class="tool-btn" onclick="triggerAction('image')">
+                            <svg class="icon" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+                            IMG
+                        </div>
                     </div>
 
-                    <div class="right-controls">
-                        <div class="model-select-wrapper">
-                            <div class="model-menu" id="modelMenu">
-                                <div class="model-option" onclick="selectModel('flash')">
-                                    <span>⚡ AXION FLASH</span>
-                                    <span id="check-flash"></span>
-                                </div>
-                                <div class="model-option" onclick="selectModel('pro')">
-                                    <span>⚛ AXION PRO</span>
-                                    <span id="check-pro">✓</span>
-                                </div>
-                            </div>
-                            <button class="model-btn" onclick="toggleModelMenu()">
-                                <span class="bolt-icon" id="currentModelIcon">⚛</span>
-                                <span id="currentModelLabel">Pro</span>
-                                <span style="font-size:0.7em">▼</span>
-                            </button>
-                        </div>
-
-                        <button class="send-btn" onclick="sendMsg()">
-                            <svg viewBox="0 0 24 24" style="width:16px; height:16px; fill:currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
-                        </button>
+                    <div class="model-selector" onclick="cycleModel()">
+                        <span id="model-icon">⚡</span>
+                        <span id="model-name">FLASH</span>
                     </div>
                 </div>
             </div>
-            <div style="text-align:center; font-size:0.7em; color:#444; margin-top:10px;">Axion pode cometer erros. Verifique informações importantes.</div>
+            <div style="text-align: center; font-size: 0.7em; color: #444; margin-top: 10px;">AI SOUND ENGINE: ON</div>
         </div>
+    </div>
 
+    <div class="edit-overlay" id="edit-modal">
+        <div class="edit-box">
+            <h3 style="color:var(--neon-main); margin-top:0;">RENOMEAR SESSÃO</h3>
+            <input type="text" id="rename-input" style="width:100%; padding:10px; background:#000; color:#fff; border:1px solid #333; margin-bottom:15px;">
+            <div style="display:flex; justify-content:space-between;">
+                <button onclick="closeEdit()" style="background:transparent; color:#888; border:1px solid #333; padding:5px 15px; cursor:pointer;">CANCEL</button>
+                <button onclick="confirmRename()" style="background:var(--neon-main); color:#000; border:none; padding:5px 15px; cursor:pointer;">SALVAR</button>
+            </div>
+        </div>
     </div>
 
 <script>
-    const API_URL = "https://axion-groq.dragonsjose0.workers.dev/";
+    // --- AUDIO ENGINE (Web Audio API) ---
+    // Cria sons sintéticos para não depender de arquivos
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     
+    function playTone(freq, type, duration, vol) {
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function soundHover() { playTone(400, 'sine', 0.1, 0.05); }
+    function soundClick() { playTone(800, 'square', 0.1, 0.1); }
+    function soundType() { playTone(600 + Math.random()*200, 'triangle', 0.05, 0.02); }
+    function soundAmbient() {
+        // Zumbido de fundo (Brown noise simulado com osciladores graves)
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.frequency.value = 50;
+        gain.gain.value = 0.01;
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+    }
+
     // --- ESTADO ---
-    let currentUser = localStorage.getItem("axion_user") || null;
-    let chats = JSON.parse(localStorage.getItem("axion_chats")) || [];
-    let currentChatId = null; // Começa nulo (Tela de Boas Vindas)
-    let currentModel = 'pro';
+    let state = {
+        user: localStorage.getItem('axion_user') || null,
+        chats: JSON.parse(localStorage.getItem('axion_chats')) || [],
+        currentChatId: null,
+        isTempMode: false,
+        model: 'FLASH'
+    };
 
-    // --- LOGIN ---
-    function checkLogin() {
-        if (currentUser) {
-            document.getElementById("login-overlay").style.opacity = "0";
-            setTimeout(() => document.getElementById("login-overlay").style.display = "none", 600);
-            
-            document.getElementById("userNameDisplay").innerText = currentUser;
-            document.getElementById("userAvatar").innerText = currentUser.substring(0,2).toUpperCase();
-            
-            renderHistory();
-            // Ao logar, vai para tela de "New Chat" (Landing)
-            resetToLanding(); 
-        }
+    let editingId = null;
+
+    // --- INICIALIZAÇÃO ---
+    if(state.user) {
+        document.getElementById('login-screen').style.display = 'none';
+        updateUserDisplay();
+        renderHistory();
+        soundAmbient();
     }
-    
+
     function login() {
-        const name = document.getElementById("usernameInput").value.trim();
-        if (name) {
-            currentUser = name;
-            localStorage.setItem("axion_user", name);
-            checkLogin();
+        const name = document.getElementById('username').value.trim();
+        if(!name) return;
+        state.user = name;
+        localStorage.setItem('axion_user', name);
+        
+        soundClick();
+        
+        // Efeito Login
+        const screen = document.getElementById('login-screen');
+        screen.style.opacity = 0;
+        setTimeout(() => {
+            screen.style.display = 'none';
+            updateUserDisplay();
+            renderHistory();
+            soundAmbient();
+        }, 800);
+    }
+
+    function updateUserDisplay() {
+        document.getElementById('display-name').innerText = state.user.toUpperCase();
+        document.getElementById('display-avatar').innerText = state.user.substring(0,1).toUpperCase();
+    }
+
+    // --- TEMPORARY MODE ---
+    function toggleTempMode() {
+        soundClick();
+        state.isTempMode = !state.isTempMode;
+        document.body.classList.toggle('temp-mode');
+        document.getElementById('temp-btn').classList.toggle('active');
+        
+        if(state.isTempMode) {
+            document.getElementById('welcome-msg').innerHTML = `<div style="font-size:3rem; color:var(--temp-primary)">MODO FANTASMA</div><p>Dados não serão gravados.</p>`;
+            document.getElementById('chat-view').innerHTML = ''; // Limpa visual
+            document.getElementById('chat-view').appendChild(document.getElementById('welcome-msg'));
+            state.currentChatId = 'temp';
+        } else {
+            newChat();
         }
     }
 
-    // --- LÓGICA DE NAVEGAÇÃO ---
-    
-    // Volta para a tela inicial (logo no meio), sem criar chat no histórico ainda
-    function resetToLanding() {
-        currentChatId = null;
-        document.getElementById("landing-view").style.display = "flex";
-        document.getElementById("chat-container").style.display = "none";
-        document.getElementById("userInput").value = "";
-        document.getElementById("userInput").focus();
-        renderHistory(); // Atualiza highlight da sidebar
-    }
-
-    // Carrega um chat existente
-    function loadChat(id) {
-        currentChatId = id;
-        const chat = chats.find(c => c.id === id);
-        if (!chat) return;
-
-        // Esconde landing, mostra chat
-        document.getElementById("landing-view").style.display = "none";
-        const container = document.getElementById("chat-container");
-        container.style.display = "flex";
-        container.innerHTML = "";
+    // --- CHAT MANAGEMENT ---
+    function newChat() {
+        state.currentChatId = null;
+        if(state.isTempMode) toggleTempMode(); // Sai do temp se clicar em new
         
-        chat.msgs.forEach(m => appendMessage(m.role, m.content, false));
-        setTimeout(() => container.scrollTop = container.scrollHeight, 100);
+        document.getElementById('chat-view').innerHTML = `
+            <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; opacity:0.7; text-align:center;" id="welcome-msg">
+                <div style="font-size:4rem; color:var(--neon-main); text-shadow:0 0 30px var(--neon-main);">AXION</div>
+                <p>AGUARDANDO INPUT...</p>
+            </div>`;
         renderHistory();
     }
 
+    function saveChats() {
+        if(!state.isTempMode) {
+            localStorage.setItem('axion_chats', JSON.stringify(state.chats));
+        }
+    }
+
+    function createChat(firstMsg) {
+        const newId = Date.now();
+        const newChat = {
+            id: newId,
+            title: firstMsg.substring(0, 20) + '...',
+            msgs: [{role: 'user', content: firstMsg}]
+        };
+        state.chats.unshift(newChat);
+        state.currentChatId = newId;
+        saveChats();
+        renderHistory();
+        return newChat;
+    }
+
+    function loadChat(id) {
+        if(state.isTempMode) return;
+        soundClick();
+        state.currentChatId = id;
+        const chat = state.chats.find(c => c.id === id);
+        if(!chat) return;
+
+        const view = document.getElementById('chat-view');
+        view.innerHTML = '';
+        chat.msgs.forEach(msg => appendMsgBubble(msg.role, msg.content));
+        renderHistory();
+    }
+
+    function deleteChat(e, id) {
+        e.stopPropagation();
+        if(confirm('EXCLUIR SESSÃO? Essa ação é irreversível.')) {
+            state.chats = state.chats.filter(c => c.id !== id);
+            saveChats();
+            if(state.currentChatId === id) newChat();
+            renderHistory();
+            soundClick();
+        }
+    }
+
+    function openRename(e, id) {
+        e.stopPropagation();
+        editingId = id;
+        const chat = state.chats.find(c => c.id === id);
+        document.getElementById('rename-input').value = chat.title;
+        document.getElementById('edit-modal').style.display = 'flex';
+        soundClick();
+    }
+
+    function closeEdit() {
+        document.getElementById('edit-modal').style.display = 'none';
+        editingId = null;
+    }
+
+    function confirmRename() {
+        const newVal = document.getElementById('rename-input').value;
+        if(newVal && editingId) {
+            const chat = state.chats.find(c => c.id === editingId);
+            chat.title = newVal;
+            saveChats();
+            renderHistory();
+        }
+        closeEdit();
+    }
+
     function renderHistory() {
-        const list = document.getElementById("historyList");
-        list.innerHTML = "";
-        chats.forEach(chat => {
-            const div = document.createElement("div");
-            div.className = `chat-item ${chat.id === currentChatId ? 'active' : ''}`;
-            div.innerText = chat.title;
+        const container = document.getElementById('history');
+        container.innerHTML = '';
+        state.chats.forEach(chat => {
+            const div = document.createElement('div');
+            div.className = `chat-item ${chat.id === state.currentChatId ? 'active' : ''}`;
             div.onclick = () => loadChat(chat.id);
-            list.appendChild(div);
+            div.onmouseenter = soundHover;
+            div.innerHTML = `
+                <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:160px;">${chat.title}</span>
+                <div class="chat-actions">
+                    <div class="action-icon" onclick="openRename(event, ${chat.id})">✎</div>
+                    <div class="action-icon action-del" onclick="deleteChat(event, ${chat.id})">🗑</div>
+                </div>
+            `;
+            container.appendChild(div);
         });
     }
 
-    // --- LÓGICA DE MENSAGENS ---
-    
-    function setInput(text) {
-        document.getElementById("userInput").value = text;
-        autoResize(document.getElementById("userInput"));
-        document.getElementById("userInput").focus();
+    // --- MESSAGING ---
+    function checkEnter(e) {
+        if(e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            send();
+        }
+        soundType();
     }
 
-    function autoResize(el) {
+    function resize(el) {
         el.style.height = 'auto';
-        el.style.height = Math.min(el.scrollHeight, 200) + 'px';
+        el.style.height = el.scrollHeight + 'px';
     }
 
-    function appendMessage(role, content, animate = true) {
-        const container = document.getElementById("chat-container");
-        const div = document.createElement("div");
-        div.className = `msg-row ${role}`;
-        
-        let html = "";
-        if (role === 'ai') {
-            html = `<div style="display:flex; width:100%;">
-                        <div style="width:30px; margin-right:10px; display:flex; flex-direction:column; align-items:center;">
-                            <div style="color:var(--secondary); font-size:1.2em;">⚛</div>
-                        </div>
-                        <div class="msg-content">${marked.parse(content)}</div>
-                    </div>`;
-        } else {
-            html = `<div class="msg-content">${content.replace(/\n/g, '<br>')}</div>`;
-        }
-        
-        div.innerHTML = html;
-        container.appendChild(div);
-        if(animate) container.scrollTop = container.scrollHeight;
-    }
-
-    async function sendMsg() {
-        const input = document.getElementById("userInput");
+    async function send() {
+        const input = document.getElementById('prompt');
         const text = input.value.trim();
-        if (!text) return;
+        if(!text) return;
 
-        // SE NÃO TEM CHAT ATIVO, CRIA AGORA (Comportamento ChatGPT)
-        if (!currentChatId) {
-            const newId = Date.now();
-            const newChat = {
-                id: newId,
-                title: text.length > 20 ? text.substring(0, 20) + "..." : text,
-                msgs: []
-            };
-            chats.unshift(newChat); // Adiciona no topo
-            currentChatId = newId;
-            
-            // Troca visualmente para modo Chat
-            document.getElementById("landing-view").style.display = "none";
-            document.getElementById("chat-container").style.display = "flex";
-        }
+        soundClick();
+        input.value = '';
+        resize(input);
 
-        const chat = chats.find(c => c.id === currentChatId);
-        
-        // Limpa input
-        input.value = "";
-        input.style.height = "auto";
+        // Remove Welcome Msg
+        const welcome = document.getElementById('welcome-msg');
+        if(welcome) welcome.remove();
 
-        // Adiciona User Msg
-        chat.msgs.push({ role: 'user', content: text });
-        appendMessage('user', text);
-        renderHistory(); // Atualiza titulo na sidebar se for novo
-        localStorage.setItem("axion_chats", JSON.stringify(chats));
+        // UI User
+        appendMsgBubble('user', text);
 
-        // Loading
-        const loadingId = "load-" + Date.now();
-        const container = document.getElementById("chat-container");
-        const loader = document.createElement("div");
-        loader.className = "msg-row ai";
-        loader.id = loadingId;
-        loader.innerHTML = `<div style="margin-left:45px; color:var(--primary); font-family:'Share Tech Mono'; animation:blink 1s infinite">PROCESSING REQUEST [${currentModel.toUpperCase()}]...</div>`;
-        container.appendChild(loader);
-        container.scrollTop = container.scrollHeight;
-
-        try {
-            // Prepara prompt com contexto de modelo
-            let promptToSend = text;
-            if(currentModel === 'pro') promptToSend = "[SYSTEM: USE PRO/REASONING CAPABILITIES] " + text;
-            
-            const req = await fetch(API_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ prompt: promptToSend })
-            });
-            
-            const res = await req.json();
-            const aiText = res.reply || "Erro no link neural.";
-
-            document.getElementById(loadingId).remove();
-            
-            chat.msgs.push({ role: 'ai', content: aiText });
-            appendMessage('ai', aiText);
-            localStorage.setItem("axion_chats", JSON.stringify(chats));
-
-        } catch (e) {
-            document.getElementById(loadingId).remove();
-            appendMessage('ai', "⚠️ Falha crítica na conexão.");
-        }
-    }
-
-    // --- SELETOR DE MODELO ---
-    function toggleModelMenu() {
-        const menu = document.getElementById("modelMenu");
-        menu.classList.toggle("show");
-    }
-
-    function selectModel(model) {
-        currentModel = model;
-        document.getElementById("check-flash").innerText = model === 'flash' ? '✓' : '';
-        document.getElementById("check-pro").innerText = model === 'pro' ? '✓' : '';
-        
-        document.getElementById("currentModelLabel").innerText = model === 'flash' ? 'Flash' : 'Pro';
-        document.getElementById("currentModelIcon").innerText = model === 'flash' ? '⚡' : '⚛';
-        
-        document.getElementById("modelMenu").classList.remove("show");
-    }
-
-    // Fecha menu se clicar fora
-    window.onclick = function(event) {
-        if (!event.target.matches('.model-btn') && !event.target.closest('.model-btn')) {
-            var dropdowns = document.getElementsByClassName("model-menu");
-            for (var i = 0; i < dropdowns.length; i++) {
-                if (dropdowns[i].classList.contains('show')) {
-                    dropdowns[i].classList.remove('show');
-                }
+        // Lógica de Storage
+        if(!state.isTempMode) {
+            if(!state.currentChatId) {
+                createChat(text);
+            } else {
+                const chat = state.chats.find(c => c.id === state.currentChatId);
+                chat.msgs.push({role:'user', content:text});
+                saveChats();
             }
         }
+
+        // Mock AI Response
+        const loadingId = 'loading-' + Date.now();
+        appendMsgBubble('ai', `<span id="${loadingId}">PROCESSANDO DADOS [${state.model}]...</span>`);
+        
+        // Simulação de resposta (Aqui você conectaria sua API)
+        setTimeout(() => {
+            const el = document.getElementById(loadingId);
+            if(el) {
+                let reply = "Comando recebido. Sistema operando em capacidade máxima. ";
+                if(state.model === 'IMAGE') reply = "Gerando representação visual... [IMAGEM MOCKUP]";
+                else reply += `Analisei sua solicitação: "${text}". A resposta requer processamento neural complexo.`;
+
+                el.parentElement.innerHTML = marked.parse(reply);
+                
+                if(!state.isTempMode && state.currentChatId !== 'temp') {
+                    const chat = state.chats.find(c => c.id === state.currentChatId);
+                    if(chat) {
+                        chat.msgs.push({role:'ai', content: reply});
+                        saveChats();
+                    }
+                }
+                playTone(600, 'sine', 0.2, 0.1); // Som de resposta
+            }
+        }, 1500);
     }
 
-    // --- BACKGROUND PARTICLES ---
-    const canvas = document.getElementById("bg");
-    const ctx = canvas.getContext("2d");
-    let w, h;
-    function resize() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
-    window.addEventListener("resize", resize); resize();
+    function appendMsgBubble(role, html) {
+        const view = document.getElementById('chat-view');
+        const div = document.createElement('div');
+        div.className = `msg ${role}`;
+        div.innerHTML = `<div class="bubble">${html}</div>`;
+        view.appendChild(div);
+        view.scrollTop = view.scrollHeight;
+    }
 
-    const particles = Array(60).fill().map(() => ({
-        x: Math.random() * w, y: Math.random() * h,
-        vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5,
-        size: Math.random() * 2, color: Math.random() > 0.5 ? "#00f3ff" : "#bc13fe"
-    }));
+    // --- TOOLS ---
+    function cycleModel() {
+        soundClick();
+        const models = ['FLASH', 'PRO', 'IMAGE'];
+        const icons = {'FLASH': '⚡', 'PRO': '⚛', 'IMAGE': '🎨'};
+        let idx = models.indexOf(state.model);
+        idx = (idx + 1) % models.length;
+        state.model = models[idx];
+        
+        document.getElementById('model-name').innerText = state.model;
+        document.getElementById('model-icon').innerText = icons[state.model];
+    }
 
-    function animate() {
-        ctx.fillStyle = "black"; ctx.fillRect(0,0,w,h);
-        particles.forEach(p => {
+    function triggerAction(type) {
+        soundClick();
+        alert(`Módulo ${type.toUpperCase()} ativado visualmente.`);
+    }
+
+    // --- BACKGROUND VISUALS ---
+    const canvas = document.getElementById('bg');
+    const ctx = canvas.getContext('2d');
+    let w, h, particles = [];
+
+    function initBg() {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+        particles = [];
+        for(let i=0; i<80; i++) {
+            particles.push({
+                x: Math.random()*w, y: Math.random()*h,
+                vx: (Math.random()-0.5)*0.5, vy: (Math.random()-0.5)*0.5,
+                color: Math.random() > 0.5 ? '#00f3ff' : '#bc13fe'
+            });
+        }
+    }
+    
+    function animBg() {
+        ctx.fillStyle = '#030305';
+        ctx.fillRect(0,0,w,h);
+        
+        particles.forEach((p, i) => {
             p.x += p.vx; p.y += p.vy;
             if(p.x < 0) p.x = w; if(p.x > w) p.x = 0;
             if(p.y < 0) p.y = h; if(p.y > h) p.y = 0;
             
-            ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
-            ctx.fillStyle = p.color; ctx.fill();
-            
-            // Linhas de conexão (Neural effect)
-            particles.forEach(p2 => {
-                const dx = p.x - p2.x, dy = p.y - p2.y;
-                const dist = Math.sqrt(dx*dx + dy*dy);
-                if(dist < 100) {
-                    ctx.strokeStyle = p.color;
-                    ctx.globalAlpha = 1 - dist/100;
-                    ctx.lineWidth = 0.2;
-                    ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
-                    ctx.globalAlpha = 1;
+            ctx.fillStyle = state.isTempMode ? (Math.random()>0.5 ? '#ff0055' : '#ffae00') : p.color;
+            ctx.beginPath(); ctx.arc(p.x, p.y, 1.5, 0, Math.PI*2); ctx.fill();
+
+            // Linhas
+            particles.forEach((p2, j) => {
+                if(i !== j) {
+                    let d = Math.hypot(p.x-p2.x, p.y-p2.y);
+                    if(d < 100) {
+                        ctx.strokeStyle = state.isTempMode ? '#ff0055' : p.color;
+                        ctx.globalAlpha = 1 - d/100;
+                        ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+                        ctx.globalAlpha = 1;
+                    }
                 }
             });
         });
-        requestAnimationFrame(animate);
+        requestAnimationFrame(animBg);
     }
-    animate();
     
-    checkLogin();
+    window.addEventListener('resize', initBg);
+    initBg();
+    animBg();
+
 </script>
 </body>
 </html>
