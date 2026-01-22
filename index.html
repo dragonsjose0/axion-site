@@ -1,93 +1,105 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Axion Neural AI</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axion Neural AI</title>
 
-<!-- FAVICON -->
-<link rel="icon" type="image/svg+xml"
-href="data:image/svg+xml,
-<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
-<text y='0.9em' font-size='90'>⚛</text>
-</svg>">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E⚛%3C/text%3E%3C/svg%3E">
 
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap');
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap');
 
-*{box-sizing:border-box;scrollbar-width:none}
-*::-webkit-scrollbar{display:none}
+        * { box-sizing: border-box; scrollbar-width: none; }
+        *::-webkit-scrollbar { display: none; }
 
-body{
-margin:0;height:100vh;display:flex;overflow:hidden;
-background:radial-gradient(circle,#050012,#000006 70%);
-color:white;font-family:'Inter',sans-serif;
-}
+        body {
+            margin: 0; height: 100vh; display: flex; overflow: hidden;
+            background: transparent; /* Alterado para transparente para mostrar o canvas */
+            color: white; font-family: 'Inter', sans-serif;
+        }
 
-canvas{position:fixed;inset:0;z-index:-1}
+        /* O fundo agora fica no canvas para não sobrepor as partículas */
+        canvas {
+            position: fixed; inset: 0; z-index: -1;
+            background: radial-gradient(circle, #050012, #000006 70%);
+        }
 
-.sidebar{
-width:260px;background:rgba(8,0,30,.45);
-backdrop-filter:blur(16px);
-border-right:1px solid rgba(0,200,255,.25);
-padding:15px;display:flex;flex-direction:column;gap:10px
-}
+        .sidebar {
+            width: 260px; background: rgba(8, 0, 30, 0.45);
+            backdrop-filter: blur(16px);
+            border-right: 1px solid rgba(0, 200, 255, 0.25);
+            padding: 15px; display: flex; flex-direction: column; gap: 10px;
+        }
 
-.new-chat{
-padding:14px;border-radius:12px;
-background:linear-gradient(90deg,#7b00ff,#00cfff);
-text-align:center;font-weight:600;cursor:pointer
-}
+        .new-chat {
+            padding: 14px; border-radius: 12px;
+            background: linear-gradient(90deg, #7b00ff, #00cfff);
+            text-align: center; font-weight: 600; cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .new-chat:hover { transform: translateY(-2px); opacity: 0.9; }
 
-.chat-item{
-padding:12px;border-radius:10px;
-background:rgba(0,40,90,.5);
-border:1px solid rgba(0,180,255,.35);
-cursor:pointer;transition:.25s
-}
+        .chat-item {
+            padding: 12px; border-radius: 10px;
+            background: rgba(0, 40, 90, 0.3);
+            border: 1px solid rgba(0, 180, 255, 0.2);
+            cursor: pointer; transition: 0.25s;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
 
-.chat-item.active{
-background:rgba(0,140,255,.9);
-border-color:#9be8ff;
-transform:scale(1.05);font-weight:600
-}
+        .chat-item.active {
+            background: rgba(0, 140, 255, 0.6);
+            border-color: #9be8ff;
+            transform: scale(1.02); font-weight: 600;
+        }
 
-.main{flex:1;display:flex;flex-direction:column;padding:20px}
+        .main { flex: 1; display: flex; flex-direction: column; padding: 20px; position: relative; }
 
-.logo-icon{text-align:center;font-size:44px;filter:drop-shadow(0 0 12px #00cfff)}
-.logo{
-text-align:center;font-size:24px;font-weight:700;margin-bottom:10px;
-background:linear-gradient(90deg,#b700ff,#00e0ff);
--webkit-background-clip:text;color:transparent
-}
+        .logo-icon { text-align: center; font-size: 44px; filter: drop-shadow(0 0 12px #00cfff); }
+        .logo {
+            text-align: center; font-size: 24px; font-weight: 700; margin-bottom: 10px;
+            background: linear-gradient(90deg, #b700ff, #00e0ff);
+            -webkit-background-clip: text; color: transparent;
+        }
 
-#chat{
-flex:1;background:rgba(0,0,20,.35);
-border:1px solid rgba(0,200,255,.25);
-border-radius:16px;padding:16px;overflow-y:auto
-}
+        #chat {
+            flex: 1; background: rgba(0, 0, 20, 0.35);
+            border: 1px solid rgba(0, 200, 255, 0.25);
+            border-radius: 16px; padding: 16px; overflow-y: auto;
+            display: flex; flex-direction: column;
+        }
 
-.msg-user,.msg-ai{
-padding:12px 14px;border-radius:14px;
-max-width:85%;margin-bottom:12px
-}
-.msg-user{background:rgba(0,120,255,.3);margin-left:auto}
-.msg-ai{background:rgba(160,0,255,.28)}
-.typing{opacity:.6;font-style:italic}
+        .msg-user, .msg-ai {
+            padding: 12px 14px; border-radius: 14px;
+            max-width: 85%; margin-bottom: 12px; line-height: 1.5;
+        }
+        .msg-user { background: rgba(0, 120, 255, 0.3); align-self: flex-end; }
+        .msg-ai { background: rgba(160, 0, 255, 0.2); align-self: flex-start; border-left: 3px solid #7b00ff; }
+        
+        /* Estilização para o Markdown dentro da IA */
+        .msg-ai p { margin: 0 0 10px 0; }
+        .msg-ai code { background: rgba(0,0,0,0.3); padding: 2px 4px; border-radius: 4px; }
 
-.bottom{display:flex;gap:10px;margin-top:10px}
-input{
-flex:1;padding:16px;border-radius:12px;
-border:1px solid rgba(0,200,255,.5);
-background:rgba(10,0,30,.85);color:white
-}
-button{
-padding:16px 28px;border-radius:12px;border:none;
-background:linear-gradient(90deg,#7b00ff,#00cfff);
-cursor:pointer;font-weight:600
-}
-</style>
+        .typing { opacity: 0.6; font-style: italic; }
+
+        .bottom { display: flex; gap: 10px; margin-top: 15px; }
+        input {
+            flex: 1; padding: 16px; border-radius: 12px;
+            border: 1px solid rgba(0, 200, 255, 0.5);
+            background: rgba(10, 0, 30, 0.85); color: white; outline: none;
+        }
+        input:focus { border-color: #00cfff; box-shadow: 0 0 10px rgba(0, 207, 255, 0.2); }
+        
+        button {
+            padding: 16px 28px; border-radius: 12px; border: none;
+            background: linear-gradient(90deg, #7b00ff, #00cfff);
+            color: white; cursor: pointer; font-weight: 600; transition: 0.3s;
+        }
+        button:hover { opacity: 0.9; box-shadow: 0 0 15px rgba(123, 0, 255, 0.4); }
+    </style>
 </head>
 
 <body>
@@ -95,135 +107,173 @@ cursor:pointer;font-weight:600
 <canvas id="bg"></canvas>
 
 <div class="sidebar">
-<div class="new-chat" onclick="novoChat()">+ Novo Chat</div>
-<div id="listaChats"></div>
+    <div class="new-chat" onclick="novoChat()">+ Novo Chat</div>
+    <div id="listaChats"></div>
 </div>
 
 <div class="main">
-<div class="logo-icon">⚛</div>
-<div class="logo">AXION NEURAL AI</div>
+    <div class="logo-icon">⚛</div>
+    <div class="logo">AXION NEURAL AI</div>
 
-<div id="chat"></div>
+    <div id="chat"></div>
 
-<div class="bottom">
-<input id="txt" placeholder="Digite sua mensagem..."
-onkeydown="if(event.key==='Enter')send()">
-<button onclick="send()">Enviar</button>
-</div>
+    <div class="bottom">
+        <input id="txt" placeholder="Digite sua mensagem..." onkeydown="if(event.key==='Enter')send()">
+        <button onclick="send()">Enviar</button>
+    </div>
 </div>
 
 <script>
-const API="https://axion-groq.dragonsjose0.workers.dev/";
+    const API = "https://axion-groq.dragonsjose0.workers.dev/";
+    let chats = [[]], chatNames = ["Início"], currentChat = 0;
 
-let chats=[[]], chatNames=["Início"], currentChat=0;
+    const stop = ["de", "da", "do", "para", "com", "sobre", "uma", "um", "e", "a", "o", "no", "na", "em"];
 
-const stop=["de","da","do","para","com","sobre","uma","um","e","a","o","no","na","em"];
+    function gerarTitulo(t) {
+        let title = t.toLowerCase().split(/\s+/)
+            .filter(w => w.length > 3 && !stop.includes(w))
+            .slice(0, 4)
+            .map(w => w[0].toUpperCase() + w.slice(1))
+            .join(" ");
+        return title || "Conversa";
+    }
 
-function gerarTitulo(t){
-return t.toLowerCase().split(/\s+/)
-.filter(w=>w.length>3&&!stop.includes(w))
-.slice(0,4)
-.map(w=>w[0].toUpperCase()+w.slice(1))
-.join(" ")||"Conversa";
-}
+    function welcome() {
+        if (chats[currentChat].length === 0) {
+            chats[currentChat].push(`
+                <div class="msg-ai">
+                    👋 Olá, eu sou a <b>Axion Neural AI</b>.<br><br>
+                    O que você precisa hoje?
+                </div>`);
+        }
+        render();
+    }
+    
+    // Inicia o primeiro chat
+    welcome();
 
-function welcome(){
-chats[currentChat]=[`
-<div class="msg-ai">
-👋 Olá, eu sou a <b>Axion Neural AI</b>.<br><br>
-O que você precisa hoje?
-</div>`];
-render();
-}
-welcome();
+    async function send() {
+        const input = document.getElementById("txt");
+        const msg = input.value.trim();
+        if (!msg) return;
 
-async function send(){
-const input=document.getElementById("txt");
-const msg=input.value.trim();
-if(!msg)return;
+        // BUG FIX: Trava o índice do chat no início da função
+        const targetChat = currentChat;
 
-if(chatNames[currentChat]==="Início")
-chatNames[currentChat]=gerarTitulo(msg);
+        if (chatNames[targetChat] === "Início") {
+            chatNames[targetChat] = gerarTitulo(msg);
+        }
 
-chats[currentChat].push(`<div class="msg-user">${msg}</div>`);
-input.value=""; render();
+        chats[targetChat].push(`<div class="msg-user">${msg}</div>`);
+        input.value = ""; 
+        render();
 
-chats[currentChat].push(`<div class="msg-ai typing">Axion está pensando…</div>`);
-render();
+        // Adiciona indicador de digitação
+        chats[targetChat].push(`<div class="msg-ai typing">Axion está pensando...</div>`);
+        render();
 
-try{
-const r=await fetch(API,{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({prompt:msg})
-});
+        try {
+            const r = await fetch(API, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prompt: msg })
+            });
 
-if(!r.ok) throw new Error("API");
+            if (!r.ok) throw new Error("API Error");
 
-const d=await r.json();
-chats[currentChat].pop();
-chats[currentChat].push(
-`<div class="msg-ai">${marked.parse(d.reply||"Erro")}</div>`
-);
-}catch(e){
-chats[currentChat].pop();
-chats[currentChat].push(`<div class="msg-ai">❌ Falha ao responder</div>`);
-}
-render();
-}
+            const d = await r.json();
+            chats[targetChat].pop(); // Remove "pensando..."
+            
+            // Renderiza o markdown da resposta
+            chats[targetChat].push(`<div class="msg-ai">${marked.parse(d.reply || "Sem resposta")}</div>`);
+        } catch (e) {
+            chats[targetChat].pop();
+            chats[targetChat].push(`<div class="msg-ai">❌ Falha ao conectar com o servidor.</div>`);
+        }
+        render();
+    }
 
-function novoChat(){
-chats.push([]); chatNames.push("Início");
-currentChat=chats.length-1; welcome();
-}
+    function novoChat() {
+        chats.push([]); 
+        chatNames.push("Início");
+        currentChat = chats.length - 1; 
+        welcome();
+    }
 
-function mudarChat(i){currentChat=i;render()}
+    function mudarChat(i) {
+        currentChat = i;
+        render();
+    }
 
-function render(){
-document.getElementById("chat").innerHTML=chats[currentChat].join("");
-document.getElementById("chat").scrollTop=99999;
-atualizarLista();
-}
+    function render() {
+        const chatDiv = document.getElementById("chat");
+        chatDiv.innerHTML = chats[currentChat].join("");
+        chatDiv.scrollTop = chatDiv.scrollHeight;
+        atualizarLista();
+    }
 
-function atualizarLista(){
-const d=document.getElementById("listaChats"); d.innerHTML="";
-chatNames.forEach((n,i)=>{
-d.innerHTML+=`
-<div class="chat-item ${i===currentChat?'active':''}"
-onclick="mudarChat(${i})">⚛ ${n}</div>`;
-});
-}
+    function atualizarLista() {
+        const d = document.getElementById("listaChats"); 
+        d.innerHTML = "";
+        chatNames.forEach((n, i) => {
+            d.innerHTML += `
+                <div class="chat-item ${i === currentChat ? 'active' : ''}" onclick="mudarChat(${i})">
+                    ⚛ ${n}
+                </div>`;
+        });
+    }
 
-/* FUNDO */
-const c=document.getElementById("bg"),ctx=c.getContext("2d");
-let w,h,p=[];
-function resize(){w=c.width=innerWidth;h=c.height=innerHeight}
-resize(); addEventListener("resize",resize);
+    /* SISTEMA DE PARTÍCULAS (FUNDO) */
+    const canvas = document.getElementById("bg"), ctx = canvas.getContext("2d");
+    let w, h, particles = [];
 
-for(let i=0;i<120;i++)
-p.push({x:Math.random()*w,y:Math.random()*h,
-vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4});
+    function resize() {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener("resize", resize);
 
-(function loop(){
-ctx.clearRect(0,0,w,h);
-for(let i=0;i<p.length;i++){
-let a=p[i]; a.x+=a.vx; a.y+=a.vy;
-if(a.x<0||a.x>w)a.vx*=-1;
-if(a.y<0||a.y>h)a.vy*=-1;
-ctx.beginPath(); ctx.arc(a.x,a.y,2,0,6.28);
-ctx.fillStyle="#00cfff"; ctx.fill();
-for(let j=i+1;j<p.length;j++){
-let b=p[j],d=Math.hypot(a.x-b.x,a.y-b.y);
-if(d<120){
-ctx.strokeStyle=`rgba(0,200,255,${1-d/120})`;
-ctx.beginPath();ctx.moveTo(a.x,a.y);
-ctx.lineTo(b.x,b.y);ctx.stroke();
-}}
-}
-requestAnimationFrame(loop);
-})();
+    for (let i = 0; i < 100; i++) {
+        particles.push({
+            x: Math.random() * w,
+            y: Math.random() * h,
+            vx: (Math.random() - 0.5) * 0.5,
+            vy: (Math.random() - 0.5) * 0.5
+        });
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, w, h);
+        for (let i = 0; i < particles.length; i++) {
+            let p = particles[i];
+            p.x += p.vx; p.y += p.vy;
+
+            if (p.x < 0 || p.x > w) p.vx *= -1;
+            if (p.y < 0 || p.y > h) p.vy *= -1;
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(0, 207, 255, 0.5)";
+            ctx.fill();
+
+            for (let j = i + 1; j < particles.length; j++) {
+                let p2 = particles[j];
+                let dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+                if (dist < 120) {
+                    ctx.strokeStyle = `rgba(0, 207, 255, ${1 - dist / 120})`;
+                    ctx.lineWidth = 0.5;
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(p2.x, p2.y);
+                    ctx.stroke();
+                }
+            }
+        }
+        requestAnimationFrame(animate);
+    }
+    animate();
 </script>
 
 </body>
 </html>
-
