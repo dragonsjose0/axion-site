@@ -198,7 +198,11 @@ async function send() {
 
     showTyping();
 
-    const res = await fetch("https://axion-ia.dragonsjose0.workers.dev/", {
+    const res = await fetch("https://axion-groq.dragonsjose0.workers.dev/", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ user })
+});
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user })
