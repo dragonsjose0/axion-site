@@ -172,23 +172,46 @@ async function send() {
 
     showTyping();
 
-    const res = await fetch("https://axion-groq.dragonsjose0.workers.dev/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user })
-    });
+    try {
+        const res = await fetch("https://axion-groq.dragonsjose0.workers.dev/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ user })
+        });
 
-    hideTyping();
+        const text = await res.text();
+        hideTyping();
 
-    const data = await res.json();
-    const answer = data.choices?.[0]?.message?.content || "Erro ao responder";
+        if (!text) {
+            addMsg("⚠️ Resposta vazia do servidor.", "msg-ai");
+            return;
+        }
 
-    addMsg(marked.parse(answer), "msg-ai", true);
-    MathJax.typeset();
+        const data = JSON.parse(text);
+
+        if (data.error) {
+            addMsg("❌ " + data.error, "msg-ai");
+            return;
+        }
+
+        const answer = data.choices?.[0]?.message?.content;
+        if (!answer) {
+            addMsg("⚠️ A IA não retornou resposta.", "msg-ai");
+            return;
+        }
+
+        addMsg(marked.parse(answer), "msg-ai", true);
+        MathJax.typeset();
+
+    } catch (err) {
+        hideTyping();
+        addMsg("❌ Erro de conexão com o servidor.", "msg-ai");
+        console.error(err);
+    }
 }
 
 function addMsg(msg, cls, html=false){
-    const formatted = `<div class="${cls}">${html ? msg : msg}</div>`;
+    const formatted = `<div class="${cls}">${msg}</div>`;
     chats[currentChat].push(formatted);
     renderChat();
 }
