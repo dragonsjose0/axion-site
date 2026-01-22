@@ -31,6 +31,7 @@ canvas {
     z-index: -1;
 }
 
+/* ===== SIDEBAR ===== */
 .sidebar {
     width: 240px;
     background: rgba(12, 0, 40, 0.4);
@@ -43,23 +44,34 @@ canvas {
 }
 
 .new-chat {
-    padding: 10px;
-    border-radius: 8px;
+    padding: 12px;
+    border-radius: 10px;
     background: linear-gradient(90deg,#7b00ff,#00b7ff);
     cursor: pointer;
     font-weight: 600;
     text-align: center;
 }
 
+/* CHAT LISTA */
 .chat-item {
-    padding: 8px;
-    border-radius: 6px;
-    background: rgba(0,0,40,0.4);
-    border: 1px solid rgba(0,160,255,0.3);
+    padding: 10px;
+    border-radius: 8px;
+    background: rgba(0, 30, 80, 0.6);
+    border: 1px solid rgba(0,160,255,0.4);
     font-size: 14px;
     cursor: pointer;
+    transition: all 0.25s ease;
 }
 
+/* CHAT ATIVO */
+.chat-item.active {
+    background: rgba(0,120,255,0.75);
+    border-color: #4fc3ff;
+    transform: scale(1.05);
+    font-weight: 600;
+}
+
+/* ===== MAIN ===== */
 .main {
     flex: 1;
     display: flex;
@@ -67,6 +79,14 @@ canvas {
     padding: 20px;
 }
 
+/* ÍCONE TOPO */
+.logo-icon {
+    text-align: center;
+    font-size: 42px;
+    margin-bottom: 5px;
+}
+
+/* TEXTO LOGO */
 .logo {
     text-align: center;
     font-size: 24px;
@@ -123,7 +143,7 @@ input {
 }
 
 button {
-    padding: 14px 20px;
+    padding: 14px 22px;
     border-radius: 8px;
     border: none;
     background: linear-gradient(90deg,#7b00ff,#00b7ff);
@@ -146,11 +166,13 @@ button {
 </div>
 
 <div class="main">
-    <div class="logo">⚛ AXION NEURAL AI</div>
+    <div class="logo-icon">⚛</div>
+    <div class="logo">AXION NEURAL AI</div>
+
     <div id="chat"></div>
 
     <div class="bottom">
-        <input id="txt" placeholder="Digite sua mensagem...">
+        <input id="txt" placeholder="Digite sua mensagem..." onkeydown="handleKey(event)">
         <button onclick="send()">Enviar</button>
     </div>
 </div>
@@ -161,6 +183,13 @@ let currentChat = 0;
 
 renderChat();
 atualizarLista();
+
+function handleKey(e) {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        send();
+    }
+}
 
 async function send() {
     const input = document.getElementById("txt");
@@ -179,20 +208,8 @@ async function send() {
             body: JSON.stringify({ user })
         });
 
-        const text = await res.text();
+        const data = await res.json();
         hideTyping();
-
-        if (!text) {
-            addMsg("⚠️ Resposta vazia do servidor.", "msg-ai");
-            return;
-        }
-
-        const data = JSON.parse(text);
-
-        if (data.error) {
-            addMsg("❌ " + data.error, "msg-ai");
-            return;
-        }
 
         const answer = data.choices?.[0]?.message?.content;
         if (!answer) {
@@ -203,16 +220,14 @@ async function send() {
         addMsg(marked.parse(answer), "msg-ai", true);
         MathJax.typeset();
 
-    } catch (err) {
+    } catch {
         hideTyping();
         addMsg("❌ Erro de conexão com o servidor.", "msg-ai");
-        console.error(err);
     }
 }
 
 function addMsg(msg, cls, html=false){
-    const formatted = `<div class="${cls}">${msg}</div>`;
-    chats[currentChat].push(formatted);
+    chats[currentChat].push(`<div class="${cls}">${msg}</div>`);
     renderChat();
 }
 
@@ -231,6 +246,7 @@ function novoChat(){
 
 function mudarChat(i){
     currentChat = i;
+    atualizarLista();
     renderChat();
 }
 
@@ -238,7 +254,11 @@ function atualizarLista(){
     const div = document.getElementById("listaChats");
     div.innerHTML = "";
     chats.forEach((_,i)=>{
-        div.innerHTML += `<div class="chat-item" onclick="mudarChat(${i})">⚛ Chat ${i+1}</div>`;
+        div.innerHTML += `
+        <div class="chat-item ${i === currentChat ? 'active' : ''}"
+             onclick="mudarChat(${i})">
+             ⚛ Chat ${i+1}
+        </div>`;
     });
 }
 
@@ -251,56 +271,8 @@ function hideTyping(){
     chats[currentChat] = chats[currentChat].filter(e => !e.includes("digitando"));
     renderChat();
 }
-
-/* FUNDO NEURAL */
-const c=document.getElementById("bg"),ctx=c.getContext("2d");
-let w,h,pts=[];
-function resize(){w=c.width=innerWidth;h=c.height=innerHeight;}
-resize();addEventListener("resize",resize);
-
-class Pt{
-    constructor(){
-        this.x=Math.random()*w;
-        this.y=Math.random()*h;
-        this.vx=(Math.random()-.5)*0.3;
-        this.vy=(Math.random()-.5)*0.3;
-    }
-    upd(){
-        this.x+=this.vx;
-        this.y+=this.vy;
-        if(this.x<0||this.x>w) this.vx*=-1;
-        if(this.y<0||this.y>h) this.vy*=-1;
-    }
-    draw(){
-        ctx.beginPath();
-        ctx.arc(this.x,this.y,2,0,6.28);
-        ctx.fillStyle="rgba(0,200,255,0.8)";
-        ctx.fill();
-    }
-}
-for(let i=0;i<90;i++) pts.push(new Pt());
-
-function loop(){
-    ctx.clearRect(0,0,w,h);
-    pts.forEach(p=>p.upd());
-    for(let i=0;i<pts.length;i++){
-        for(let j=i+1;j<pts.length;j++){
-            let a=pts[i],b=pts[j];
-            let d=Math.hypot(a.x-b.x,a.y-b.y);
-            if(d<120){
-                ctx.strokeStyle=`rgba(0,200,255,${1-d/120})`;
-                ctx.beginPath();
-                ctx.moveTo(a.x,a.y);
-                ctx.lineTo(b.x,b.y);
-                ctx.stroke();
-            }
-        }
-        pts[i].draw();
-    }
-    requestAnimationFrame(loop);
-}
-loop();
 </script>
 
 </body>
 </html>
+
