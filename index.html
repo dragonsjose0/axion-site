@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>Axion Neural AI</title>
 
-<!-- FAVICON ATÔMICO -->
+<!-- FAVICON -->
 <link rel="icon" type="image/svg+xml"
 href="data:image/svg+xml,
 <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
@@ -16,138 +16,76 @@ href="data:image/svg+xml,
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap');
 
-*{
-    box-sizing:border-box;
-    scrollbar-width:none;
-}
-*::-webkit-scrollbar{display:none;}
+*{box-sizing:border-box;scrollbar-width:none}
+*::-webkit-scrollbar{display:none}
 
 body{
-    margin:0;
-    height:100vh;
-    display:flex;
-    overflow:hidden;
-    background:radial-gradient(circle,#050012,#000006 70%);
-    color:white;
-    font-family:'Inter',sans-serif;
+margin:0;height:100vh;display:flex;overflow:hidden;
+background:radial-gradient(circle,#050012,#000006 70%);
+color:white;font-family:'Inter',sans-serif;
 }
 
-/* FUNDO */
-canvas{
-    position:fixed;
-    inset:0;
-    z-index:-1;
-}
+canvas{position:fixed;inset:0;z-index:-1}
 
-/* SIDEBAR */
 .sidebar{
-    width:260px;
-    background:rgba(8,0,30,.45);
-    backdrop-filter:blur(16px);
-    border-right:1px solid rgba(0,200,255,.25);
-    padding:15px;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
+width:260px;background:rgba(8,0,30,.45);
+backdrop-filter:blur(16px);
+border-right:1px solid rgba(0,200,255,.25);
+padding:15px;display:flex;flex-direction:column;gap:10px
 }
 
 .new-chat{
-    padding:14px;
-    border-radius:12px;
-    background:linear-gradient(90deg,#7b00ff,#00cfff);
-    text-align:center;
-    font-weight:600;
-    cursor:pointer;
+padding:14px;border-radius:12px;
+background:linear-gradient(90deg,#7b00ff,#00cfff);
+text-align:center;font-weight:600;cursor:pointer
 }
 
-/* CHAT LISTA */
 .chat-item{
-    padding:12px;
-    border-radius:10px;
-    background:rgba(0,40,90,.5);
-    border:1px solid rgba(0,180,255,.35);
-    cursor:pointer;
-    transition:.25s;
+padding:12px;border-radius:10px;
+background:rgba(0,40,90,.5);
+border:1px solid rgba(0,180,255,.35);
+cursor:pointer;transition:.25s
 }
 
 .chat-item.active{
-    background:rgba(0,140,255,.9);
-    border-color:#9be8ff;
-    transform:scale(1.05);
-    font-weight:600;
+background:rgba(0,140,255,.9);
+border-color:#9be8ff;
+transform:scale(1.05);font-weight:600
 }
 
-/* MAIN */
-.main{
-    flex:1;
-    display:flex;
-    flex-direction:column;
-    padding:20px;
-}
+.main{flex:1;display:flex;flex-direction:column;padding:20px}
 
-.logo-icon{
-    text-align:center;
-    font-size:44px;
-    filter:drop-shadow(0 0 12px #00cfff);
-}
+.logo-icon{text-align:center;font-size:44px;filter:drop-shadow(0 0 12px #00cfff)}
 .logo{
-    text-align:center;
-    font-size:24px;
-    font-weight:700;
-    margin-bottom:10px;
-    background:linear-gradient(90deg,#b700ff,#00e0ff);
-    -webkit-background-clip:text;
-    color:transparent;
+text-align:center;font-size:24px;font-weight:700;margin-bottom:10px;
+background:linear-gradient(90deg,#b700ff,#00e0ff);
+-webkit-background-clip:text;color:transparent
 }
 
 #chat{
-    flex:1;
-    background:rgba(0,0,20,.35);
-    border:1px solid rgba(0,200,255,.25);
-    border-radius:16px;
-    padding:16px;
-    overflow-y:auto;
+flex:1;background:rgba(0,0,20,.35);
+border:1px solid rgba(0,200,255,.25);
+border-radius:16px;padding:16px;overflow-y:auto
 }
 
 .msg-user,.msg-ai{
-    padding:12px 14px;
-    border-radius:14px;
-    max-width:85%;
-    margin-bottom:12px;
+padding:12px 14px;border-radius:14px;
+max-width:85%;margin-bottom:12px
 }
-.msg-user{
-    background:rgba(0,120,255,.3);
-    margin-left:auto;
-}
-.msg-ai{
-    background:rgba(160,0,255,.28);
-}
-.typing{
-    opacity:.7;
-    font-style:italic;
-}
+.msg-user{background:rgba(0,120,255,.3);margin-left:auto}
+.msg-ai{background:rgba(160,0,255,.28)}
+.typing{opacity:.6;font-style:italic}
 
-/* INPUT */
-.bottom{
-    display:flex;
-    gap:10px;
-    margin-top:10px;
-}
+.bottom{display:flex;gap:10px;margin-top:10px}
 input{
-    flex:1;
-    padding:16px;
-    border-radius:12px;
-    border:1px solid rgba(0,200,255,.5);
-    background:rgba(10,0,30,.85);
-    color:white;
+flex:1;padding:16px;border-radius:12px;
+border:1px solid rgba(0,200,255,.5);
+background:rgba(10,0,30,.85);color:white
 }
 button{
-    padding:16px 28px;
-    border-radius:12px;
-    border:none;
-    background:linear-gradient(90deg,#7b00ff,#00cfff);
-    cursor:pointer;
-    font-weight:600;
+padding:16px 28px;border-radius:12px;border:none;
+background:linear-gradient(90deg,#7b00ff,#00cfff);
+cursor:pointer;font-weight:600
 }
 </style>
 </head>
@@ -157,140 +95,133 @@ button{
 <canvas id="bg"></canvas>
 
 <div class="sidebar">
-    <div class="new-chat" onclick="novoChat()">+ Novo Chat</div>
-    <div id="listaChats"></div>
+<div class="new-chat" onclick="novoChat()">+ Novo Chat</div>
+<div id="listaChats"></div>
 </div>
 
 <div class="main">
-    <div class="logo-icon">⚛</div>
-    <div class="logo">AXION NEURAL AI</div>
+<div class="logo-icon">⚛</div>
+<div class="logo">AXION NEURAL AI</div>
 
-    <div id="chat"></div>
+<div id="chat"></div>
 
-    <div class="bottom">
-        <input id="txt" placeholder="Digite sua mensagem..."
-        onkeydown="if(event.key==='Enter')send()">
-        <button onclick="send()">Enviar</button>
-    </div>
+<div class="bottom">
+<input id="txt" placeholder="Digite sua mensagem..."
+onkeydown="if(event.key==='Enter')send()">
+<button onclick="send()">Enviar</button>
+</div>
 </div>
 
 <script>
 const API="https://axion-groq.dragonsjose0.workers.dev/";
 
-let chats=[[]];
-let chatNames=["Início"];
-let currentChat=0;
+let chats=[[]], chatNames=["Início"], currentChat=0;
 
-/* PALAVRAS-CHAVE */
 const stop=["de","da","do","para","com","sobre","uma","um","e","a","o","no","na","em"];
 
 function gerarTitulo(t){
-    return t.toLowerCase().split(/\s+/)
-    .filter(w=>w.length>3&&!stop.includes(w))
-    .slice(0,4)
-    .map(w=>w[0].toUpperCase()+w.slice(1))
-    .join(" ")||"Conversa";
+return t.toLowerCase().split(/\s+/)
+.filter(w=>w.length>3&&!stop.includes(w))
+.slice(0,4)
+.map(w=>w[0].toUpperCase()+w.slice(1))
+.join(" ")||"Conversa";
 }
 
-/* WELCOME */
 function welcome(){
-    chats[currentChat]=[`
-    <div class="msg-ai">
-    👋 Olá, eu sou a <b>Axion Neural AI</b>.<br><br>
-    O que você precisa hoje?
-    </div>`];
-    render();
+chats[currentChat]=[`
+<div class="msg-ai">
+👋 Olá, eu sou a <b>Axion Neural AI</b>.<br><br>
+O que você precisa hoje?
+</div>`];
+render();
 }
 welcome();
 
-/* CHAT */
 async function send(){
-    const input=document.getElementById("txt");
-    const msg=input.value.trim();
-    if(!msg)return;
+const input=document.getElementById("txt");
+const msg=input.value.trim();
+if(!msg)return;
 
-    if(chatNames[currentChat]==="Início"){
-        chatNames[currentChat]=gerarTitulo(msg);
-    }
+if(chatNames[currentChat]==="Início")
+chatNames[currentChat]=gerarTitulo(msg);
 
-    chats[currentChat].push(`<div class="msg-user">${msg}</div>`);
-    input.value="";
-    render();
+chats[currentChat].push(`<div class="msg-user">${msg}</div>`);
+input.value=""; render();
 
-    chats[currentChat].push(`<div class="msg-ai typing">Axion está pensando…</div>`);
-    render();
+chats[currentChat].push(`<div class="msg-ai typing">Axion está pensando…</div>`);
+render();
 
-    try{
-        const r=await fetch(API,{
-            method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify({user:msg})
-        });
-        const d=await r.json();
-        chats[currentChat].pop();
-        chats[currentChat].push(`<div class="msg-ai">${marked.parse(d.reply||"Erro")}</div>`);
-    }catch{
-        chats[currentChat].pop();
-        chats[currentChat].push(`<div class="msg-ai">❌ Erro de conexão</div>`);
-    }
-    render();
+try{
+const r=await fetch(API,{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({prompt:msg})
+});
+
+if(!r.ok) throw new Error("API");
+
+const d=await r.json();
+chats[currentChat].pop();
+chats[currentChat].push(
+`<div class="msg-ai">${marked.parse(d.reply||"Erro")}</div>`
+);
+}catch(e){
+chats[currentChat].pop();
+chats[currentChat].push(`<div class="msg-ai">❌ Falha ao responder</div>`);
+}
+render();
 }
 
 function novoChat(){
-    chats.push([]);
-    chatNames.push("Início");
-    currentChat=chats.length-1;
-    welcome();
+chats.push([]); chatNames.push("Início");
+currentChat=chats.length-1; welcome();
 }
 
-function mudarChat(i){
-    currentChat=i;
-    render();
-}
+function mudarChat(i){currentChat=i;render()}
 
 function render(){
-    document.getElementById("chat").innerHTML=chats[currentChat].join("");
-    atualizarLista();
-    document.getElementById("chat").scrollTop=99999;
+document.getElementById("chat").innerHTML=chats[currentChat].join("");
+document.getElementById("chat").scrollTop=99999;
+atualizarLista();
 }
 
 function atualizarLista(){
-    const d=document.getElementById("listaChats");
-    d.innerHTML="";
-    chatNames.forEach((n,i)=>{
-        d.innerHTML+=`
-        <div class="chat-item ${i===currentChat?'active':''}"
-        onclick="mudarChat(${i})">⚛ ${n}</div>`;
-    });
+const d=document.getElementById("listaChats"); d.innerHTML="";
+chatNames.forEach((n,i)=>{
+d.innerHTML+=`
+<div class="chat-item ${i===currentChat?'active':''}"
+onclick="mudarChat(${i})">⚛ ${n}</div>`;
+});
 }
 
-/* FUNDO NEURAL */
+/* FUNDO */
 const c=document.getElementById("bg"),ctx=c.getContext("2d");
 let w,h,p=[];
-function resize(){w=c.width=innerWidth;h=c.height=innerHeight;}
-resize();addEventListener("resize",resize);
+function resize(){w=c.width=innerWidth;h=c.height=innerHeight}
+resize(); addEventListener("resize",resize);
 
 for(let i=0;i<120;i++)
-p.push({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4});
+p.push({x:Math.random()*w,y:Math.random()*h,
+vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4});
 
-function loop(){
+(function loop(){
 ctx.clearRect(0,0,w,h);
 for(let i=0;i<p.length;i++){
-let a=p[i];a.x+=a.vx;a.y+=a.vy;
+let a=p[i]; a.x+=a.vx; a.y+=a.vy;
 if(a.x<0||a.x>w)a.vx*=-1;
 if(a.y<0||a.y>h)a.vy*=-1;
-ctx.beginPath();ctx.arc(a.x,a.y,2,0,6.28);
-ctx.fillStyle="#00cfff";ctx.fill();
+ctx.beginPath(); ctx.arc(a.x,a.y,2,0,6.28);
+ctx.fillStyle="#00cfff"; ctx.fill();
 for(let j=i+1;j<p.length;j++){
 let b=p[j],d=Math.hypot(a.x-b.x,a.y-b.y);
 if(d<120){
 ctx.strokeStyle=`rgba(0,200,255,${1-d/120})`;
-ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+ctx.beginPath();ctx.moveTo(a.x,a.y);
+ctx.lineTo(b.x,b.y);ctx.stroke();
 }}
 }
 requestAnimationFrame(loop);
-}
-loop();
+})();
 </script>
 
 </body>
