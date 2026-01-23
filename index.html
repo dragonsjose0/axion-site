@@ -14,8 +14,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
 
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-
     <style>
         :root {
             /* Palette Neon Pro */
@@ -54,56 +52,6 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #555; }
-
-        /* --- LOGIN OVERLAY --- */
-        #auth-layer {
-            position: fixed; inset: 0;
-            background: rgba(3, 3, 4, 0.95);
-            backdrop-filter: blur(20px);
-            z-index: 9999;
-            display: flex; align-items: center; justify-content: center;
-            transition: opacity 0.5s ease, visibility 0.5s;
-        }
-        
-        .auth-card {
-            background: #111;
-            border: 1px solid var(--glass-border);
-            padding: 40px;
-            border-radius: 24px;
-            width: 100%; max-width: 380px;
-            text-align: center;
-            box-shadow: 0 0 50px rgba(59, 130, 246, 0.1);
-            animation: floatUp 0.6s ease-out;
-            position: relative;
-        }
-        
-        .brand-logo {
-            font-size: 2.5rem; font-weight: 700; letter-spacing: -1px;
-            background: linear-gradient(135deg, #fff 30%, var(--primary));
-            -webkit-background-clip: text; color: transparent;
-            margin-bottom: 30px; display: inline-block;
-        }
-
-        .btn-full {
-            width: 100%; padding: 14px;
-            border-radius: 12px; font-weight: 500; font-size: 0.95rem;
-            cursor: pointer; transition: all 0.2s; border: none;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            margin-bottom: 12px;
-            position: relative;
-        }
-        
-        /* Botão Google Customizado (Container para o botão oficial) */
-        .google-btn-wrapper {
-            margin-bottom: 15px;
-            height: 48px;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-        }
-        
-        .btn-anon { background: rgba(255,255,255,0.05); color: var(--text-secondary); border: 1px solid var(--glass-border); }
-        .btn-anon:hover { background: rgba(255,255,255,0.1); color: white; border-color: rgba(255,255,255,0.2); }
 
         /* --- SIDEBAR --- */
         .sidebar {
@@ -154,11 +102,12 @@
         }
         .avatar {
             width: 32px; height: 32px; border-radius: 50%;
-            background: var(--glass-border); display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #333, #555); 
+            display: flex; align-items: center; justify-content: center;
             font-weight: 600; font-size: 0.8rem; color: #fff;
             overflow: hidden;
+            border: 1px solid var(--glass-border);
         }
-        .avatar img { width: 100%; height: 100%; object-fit: cover; }
 
         /* --- MAIN CHAT AREA --- */
         .main-content {
@@ -296,42 +245,11 @@
             .prompts-grid { grid-template-columns: 1fr; }
         }
 
-        @keyframes floatUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideIn { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
 <body>
-
-    <div id="auth-layer">
-        <div class="auth-card">
-            <div class="brand-logo">AXION</div>
-            <p style="color:var(--text-secondary); margin-bottom:30px;">Interface Neural V4.0</p>
-            
-            <div class="google-btn-wrapper">
-                <div id="g_id_onload"
-                     data-client_id="SEU_CLIENT_ID_DO_GOOGLE_AQUI" 
-                     data-context="signin"
-                     data-ux_mode="popup"
-                     data-callback="handleGoogleLogin"
-                     data-auto_prompt="false">
-                </div>
-                <div class="g_id_signin"
-                     data-type="standard"
-                     data-shape="rectangular"
-                     data-theme="outline"
-                     data-text="continue_with"
-                     data-size="large"
-                     data-logo_alignment="left"
-                     data-width="280">
-                </div>
-            </div>
-
-            <button class="btn-full btn-anon" onclick="App.login('guest')">
-                <i class="fas fa-user-secret"></i> Acesso Visitante
-            </button>
-        </div>
-    </div>
 
     <div class="sidebar" id="sidebar">
         <button class="new-chat-btn" onclick="App.startNewChat()">
@@ -342,12 +260,13 @@
             </div>
 
         <div class="user-profile">
-            <div class="avatar" id="u-avatar">U</div>
+            <div class="avatar">U</div>
             <div style="flex:1; overflow:hidden;">
-                <div id="u-name" style="font-weight:500; font-size:0.9rem;">Usuário</div>
-                <div id="u-email" style="font-size:0.75rem; color:#666; text-overflow:ellipsis; overflow:hidden;">Online</div>
+                <div style="font-weight:500; font-size:0.9rem;">Usuário</div>
+                <div style="font-size:0.75rem; color:#4ade80; display:flex; align-items:center; gap:4px;">
+                    <span style="width:6px; height:6px; background:#4ade80; border-radius:50%;"></span> Online
+                </div>
             </div>
-            <i class="fas fa-sign-out-alt" onclick="App.logout()" title="Sair" style="cursor:pointer; color:#555;"></i>
         </div>
     </div>
 
@@ -364,29 +283,29 @@
 
         <div id="welcome-view" class="welcome-view">
             <div style="font-size:3rem; margin-bottom:10px;">💠</div>
-            <h2 class="welcome-title">Olá, <span id="welcome-name">Visitante</span></h2>
-            <p style="color:var(--text-secondary);">Como posso expandir sua inteligência hoje?</p>
+            <h2 class="welcome-title">Olá, Humano</h2>
+            <p style="color:var(--text-secondary);">O que vamos descobrir hoje?</p>
 
             <div class="prompts-grid">
-                <div class="prompt-card" onclick="App.setInput('Crie um script em Python para automação de arquivos.')">
+                <div class="prompt-card" onclick="App.setInput('Crie um script em Python para automação.')">
                     <i class="fab fa-python"></i>
                     <h4>Gerar Código</h4>
-                    <p>Python, JS, algoritmos complexos.</p>
+                    <p>Python, JS, HTML e automações.</p>
                 </div>
-                <div class="prompt-card" onclick="App.setInput('Me explique a computação quântica de forma simples.')">
+                <div class="prompt-card" onclick="App.setInput('Me explique a teoria da relatividade.')">
                     <i class="fas fa-atom"></i>
-                    <h4>Conceitos Complexos</h4>
-                    <p>Ciência, Física e Tecnologia.</p>
+                    <h4>Ciência</h4>
+                    <p>Física, biologia e astronomia.</p>
                 </div>
-                <div class="prompt-card" onclick="App.setInput('Escreva um e-mail profissional recusando um convite educadamente.')">
-                    <i class="fas fa-envelope-open-text"></i>
-                    <h4>Escrita Profissional</h4>
-                    <p>E-mails, relatórios e textos.</p>
+                <div class="prompt-card" onclick="App.setInput('Melhore este texto para ser mais formal...')">
+                    <i class="fas fa-pen-fancy"></i>
+                    <h4>Redação</h4>
+                    <p>E-mails, relatórios e correções.</p>
                 </div>
-                <div class="prompt-card" onclick="App.setInput('Crie um roteiro de viagem de 3 dias para Tóquio.')">
-                    <i class="fas fa-plane"></i>
+                <div class="prompt-card" onclick="App.setInput('Dê ideias de nomes para um canal de tecnologia.')">
+                    <i class="fas fa-lightbulb"></i>
                     <h4>Criatividade</h4>
-                    <p>Ideias, roteiros e brainstorming.</p>
+                    <p>Brainstorming e novas ideias.</p>
                 </div>
             </div>
         </div>
@@ -409,67 +328,38 @@
 
     <script>
         /* ================= CONFIGURAÇÃO ================= */
-        const API_URL = "SUA_URL_DO_WORKER_AQUI"; // << COLOQUE A URL DO SEU WORKER AQUI
-
-        /* --- GOOGLE AUTH HANDLER (Global) --- */
-        function handleGoogleLogin(response) {
-            // Decodifica o JWT para pegar dados do usuário (sem backend)
-            const responsePayload = decodeJwtResponse(response.credential);
-            
-            const user = {
-                name: responsePayload.name,
-                email: responsePayload.email,
-                avatar: responsePayload.picture,
-                type: 'google'
-            };
-            
-            App.completeLogin(user);
-        }
-
-        function decodeJwtResponse(token) {
-            var base64Url = token.split('.')[1];
-            var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
-                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join(''));
-            return JSON.parse(jsonPayload);
-        }
+        // SUA URL DO WORKER JÁ CONECTADA ABAIXO:
+        const API_URL = "https://axion-groq.dragonsjose0.workers.dev/"; 
 
         const App = {
             state: {
-                user: null,
                 chats: [],
                 activeChatId: null,
                 isTyping: false
             },
 
             init() {
-                // Carrega dados locais
+                // Carrega histórico local
                 try {
-                    const savedUser = localStorage.getItem('axion_user');
-                    if (savedUser) this.state.user = JSON.parse(savedUser);
-                    
                     const savedHistory = localStorage.getItem('axion_history');
                     if (savedHistory) this.state.chats = JSON.parse(savedHistory);
                 } catch(e) {
                     console.error("Erro ao carregar dados", e);
                 }
 
-                // Config Marked.js
+                // Config Marked.js (Markdown)
                 marked.setOptions({
                     highlight: (code, lang) => hljs.highlightAuto(code).value,
                     breaks: true
                 });
 
-                if (this.state.user) {
-                    this.showInterface();
-                }
+                // Inicializa a UI diretamente (sem login)
+                this.renderHistory();
 
                 // Ajuste mobile Overlay
                 const sidebar = document.getElementById('sidebar');
                 const overlay = document.getElementById('sidebar-overlay');
                 
-                // Observador para mostrar/esconder overlay
                 const observer = new MutationObserver((mutations) => {
                     mutations.forEach((mutation) => {
                         if (mutation.target.classList.contains('show')) {
@@ -482,58 +372,7 @@
                 observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
             },
 
-            /* --- AUTENTICAÇÃO --- */
-            login(type) {
-                if(type === 'guest') {
-                    const user = { 
-                        name: "Visitante", 
-                        email: "Modo Anônimo", 
-                        avatar: null, // null usará a letra inicial
-                        type: 'guest'
-                    };
-                    this.completeLogin(user);
-                }
-            },
-
-            completeLogin(user) {
-                this.state.user = user;
-                localStorage.setItem('axion_user', JSON.stringify(user));
-                
-                const authLayer = document.getElementById('auth-layer');
-                authLayer.style.opacity = '0';
-                authLayer.style.visibility = 'hidden'; // Garante que não é clicável
-                
-                setTimeout(() => {
-                    authLayer.style.display = 'none';
-                    this.showInterface();
-                }, 500);
-            },
-
-            logout() {
-                localStorage.removeItem('axion_user');
-                location.reload();
-            },
-
-            showInterface() {
-                // Remove layer caso ainda esteja visível por algum erro
-                document.getElementById('auth-layer').style.display = 'none';
-                
-                // Atualiza UI
-                document.getElementById('u-name').innerText = this.state.user.name;
-                document.getElementById('u-email').innerText = this.state.user.email;
-                
-                const avatarEl = document.getElementById('u-avatar');
-                if (this.state.user.avatar) {
-                    avatarEl.innerHTML = `<img src="${this.state.user.avatar}" alt="Avatar">`;
-                } else {
-                    avatarEl.innerText = this.state.user.name.charAt(0).toUpperCase();
-                }
-                
-                document.getElementById('welcome-name').innerText = this.state.user.name.split(' ')[0];
-                this.renderHistory();
-            },
-
-            /* --- CHAT LOGIC --- */
+            /* --- LÓGICA DO CHAT --- */
             startNewChat() {
                 this.state.activeChatId = null;
                 this.toggleView('welcome');
@@ -567,7 +406,7 @@
                 }
             },
 
-            /* --- MESSAGING --- */
+            /* --- MENSAGENS --- */
             async sendMessage() {
                 if (this.state.isTyping) return;
                 
@@ -606,7 +445,7 @@
                     const data = await response.json();
                     
                     this.toggleLoading(false);
-                    const aiReply = data.reply || "Erro desconhecido na resposta.";
+                    const aiReply = data.reply || "Sem resposta da IA.";
                     
                     this.renderMessage('ai', aiReply);
                     chat.messages.push({ role: 'assistant', content: aiReply });
@@ -614,15 +453,14 @@
 
                 } catch (error) {
                     this.toggleLoading(false);
-                    this.renderMessage('ai', "⚠️ Erro de conexão. Verifique se o Worker está online.");
+                    this.renderMessage('ai', "⚠️ Erro de conexão. Verifique se o Worker na Cloudflare está configurado com a API Key correta do Groq.");
                 } finally {
                     this.state.isTyping = false;
-                    // Mantém o foco no input
                     setTimeout(() => document.getElementById('user-input').focus(), 100);
                 }
             },
 
-            /* --- UTILS --- */
+            /* --- UTILITÁRIOS --- */
             renderMessage(role, text) {
                 const container = document.getElementById('msgs-container');
                 const div = document.createElement('div');
